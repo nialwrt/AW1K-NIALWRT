@@ -1,87 +1,57 @@
 ![Screenshot from 2025-05-10 18-09-18](https://github.com/user-attachments/assets/815a731d-5891-4cbb-a056-ccac53c3d85b)
+# AW1K-NIALWRT
 
-NIALWRT-AW1K PROJECT
+**Source:** ImmortalWrt  
+**Target OS:** Ubuntu 22.04 LTS or newer
 
-Source: ImmortalWrt
-Target OS: Ubuntu 22
+## Overview
 
+AW1K-NIALWRT is a beginner-friendly OpenWrt build script designed for quick deployment and daily use. It comes with a full set of pre-configured packages and system tweaks, making it ideal for users who want a plug-and-play solution without needing to configure everything from scratch.
 
----
+## Features
 
-Highlights
+- **Ready-to-use Preset**  
+  Comes with essential packages and system configurations tailored for optimal performance and modem support.
 
-Beginner-friendly auto script
+- **Beginner Friendly**  
+  Automates the entire build process — from dependencies to final firmware output.
 
-Flexible: easily add or remove packages
+- **Customizable via Menuconfig**  
+  Offers flexibility to add, remove, or update packages and kernel versions via `make menuconfig`.
 
-Supports firmware and kernel version updates
+- **Automatic Logging**  
+  - `build.log`: Full build output  
+  - `error.log`: Captures errors during build process
 
-Default preset ready to use (plug-and-play)
+## Preset Tweaks
 
+- BBR congestion control
+- ZRAM swap enabled
+- CPU frequency scaling (all cores active)
+- TTL 64 (for modem/router compatibility)
+- Quectel-CM protocol support
 
+## Preset Packages
 
----
+- **System tools:** `htop`, traffic monitor, RAM releaser, terminal access  
+- **Modem tools:** 3GInfo Lite, modem band selector, SMS tools  
+- **Extras:** Argon theme, SFTP (OpenSSH) support
 
-Preset Tweaks
+## Default WiFi Settings
 
-BBR congestion control
+- **SSID:** `AW1K` / `AW1K 5G`  
+- **Password:** `nialwrt123`
 
-ZRAM swap
+## Requirements
 
-CPU frequency scaling (all cores enabled)
+- Ubuntu 22.04 LTS or newer
+- Internet connection
+- Adequate disk space and RAM
+- Basic terminal usage knowledge
 
-TTL 64 (for modem compatibility)
+## Quick Installation
 
-Quectel-CM protocol support
+Open your terminal and run:
 
-
-
----
-
-Preset Packages
-
-System tools: htop, traffic monitor, RAM releaser, terminal
-
-Modem tools: 3GInfo Lite, modem band selector, SMS tools
-
-Extras: Argon theme, SFTP access
-
-
-
----
-
-Default WiFi Settings
-
-SSID: AW1K / AW1K 5G
-
-Password: nialwrt123
-
-
-
----
-
-Quick Installation
-
-Run this command in your terminal:
-
+```bash
 wget https://raw.githubusercontent.com/nialwrt/AW1K-NIALWRT/main/aw1k-nialwrt.sh && chmod +x aw1k-nialwrt.sh && ./aw1k-nialwrt.sh
-
-
----
-
-Notes
-
-Tested on Ubuntu 22.04 LTS.
-
-Ensure you have sufficient disk space and memory for building.
-
-You can update firmware or kernel versions and customize additional packages using make menuconfig.
-
-
-
----
-
-Support & Donations
-
-If you find this project helpful and would like to support its development, you can donate or contact via Telegram: @NIALVPN
-

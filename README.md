@@ -19,10 +19,6 @@ AW1K-NIALWRT is a beginner-friendly OpenWrt build script designed for quick depl
 - **Customizable via Menuconfig**  
   Offers flexibility to add, remove, or update packages and kernel versions via `make menuconfig`.
 
-- **Automatic Logging**  
-  - `build.log`: Full build output  
-  - `error.log`: Captures errors during build process
-
 ## Preset Tweaks
 
 - BBR congestion control

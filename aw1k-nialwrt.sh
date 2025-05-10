@@ -4,6 +4,28 @@
 BLUE='\033[1;34m'
 NC='\033[0m'
 
+folder="immortalwrt"
+preset_folder="AW1K-NIALWRT"
+script_file="$(basename "$0")"
+
+# Check for --clean argument
+if [[ "$1" == "--clean" ]]; then
+    echo -e "${BLUE}Cleaning up directories and script...${NC}"
+    if [ -d "$folder" ]; then
+        echo -e "${BLUE}Removing '$folder' directory...${NC}"
+        rm -rf "$folder"
+    fi
+    if [ -d "$preset_folder" ]; then
+        echo -e "${BLUE}Removing '$preset_folder' directory...${NC}"
+        rm -rf "$preset_folder"
+    fi
+    if [ -f "$script_file" ]; then
+        echo -e "${BLUE}Removing script file '$script_file'...${NC}"
+        rm -f "$script_file"
+    fi
+    exit 0
+fi
+
 clear
 echo -e "${BLUE}"
 echo "AW1K-NIALWRT BUILD"
@@ -23,7 +45,6 @@ sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bis
     upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
 
 # Remove existing ImmortalWrt directory if present
-folder="immortalwrt"
 if [ -d "$folder" ]; then
     echo -e "${BLUE}Removing existing '$folder' directory...${NC}"
     rm -rf "$folder"
@@ -35,12 +56,11 @@ echo -e "${BLUE}Cloning ImmortalWrt repository...${NC}"
 git clone $repo $folder
 
 # Clone preset repository
-preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
-preset_folder="AW1K-NIALWRT"
 if [ -d "$preset_folder" ]; then
     echo -e "${BLUE}Removing existing '$preset_folder' directory...${NC}"
     rm -rf "$preset_folder"
 fi
+preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 echo -e "${BLUE}Cloning preset repository...${NC}"
 git clone $preset_repo
 
@@ -107,3 +127,18 @@ minutes=$(((duration % 3600) / 60))
 echo -e "${BLUE}"
 echo "Build completed in: ${hours} hour(s) ${minutes} minute(s)"
 echo -e "${NC}"
+
+# Go back to parent directory
+cd ..
+
+# Cleanup preset folder
+if [ -d "$preset_folder" ]; then
+    echo -e "${BLUE}Removing preset folder '$preset_folder'...${NC}"
+    rm -rf "$preset_folder"
+fi
+
+# Cleanup this script file
+if [ -f "$script_file" ]; then
+    echo -e "${BLUE}Removing script file '$script_file'...${NC}"
+    rm -f "$script_file"
+fi

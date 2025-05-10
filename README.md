@@ -58,8 +58,4 @@ WIFI PRESET
 
 LINK INSTALASI
 
-wget https://raw.githubusercontent.com/nialwrt/AW1K-NIALWRT/main/aw1k-nialwrt.sh
-
-chmod +x aw1k-nialwrt.sh
-
-./aw1k-nialwrt.sh
+wget https://raw.githubusercontent.com/nialwrt/AW1K-NIALWRT/main/aw1k-nialwrt.sh && chmod +x aw1k-nialwrt.sh && ./aw1k-nialwrt.sh

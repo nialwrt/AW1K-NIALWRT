@@ -1,0 +1,54 @@
+
+config system
+	option hostname 'AW1K NIALWRT'
+	option timezone '<+08>-8'
+	option ttylogin '0'
+	option log_size '128'
+	option urandom_seed '0'
+	option zonename 'Asia/Kuala Lumpur'
+	option log_proto 'udp'
+	option conloglevel '8'
+	option cronloglevel '7'
+	option zram_comp_algo 'lz4'
+	option zram_size_mb '433'
+
+config timeserver 'ntp'
+	list server 'ntp.tencent.com'
+	list server 'ntp1.aliyun.com'
+	list server 'ntp.ntsc.ac.cn'
+	list server 'cn.ntp.org.cn'
+
+config imm_init
+	option lang '1'
+	option system_chn '1'
+	option opkg_mirror 'https://mirrors.vsean.net/openwrt'
+	option anon_mount '1'
+
+config led
+	option name '5G'
+	option sysfs 'blue:5g'
+	option trigger 'default-on'
+
+config led
+	option name 'SIGNAL'
+	option sysfs 'blue:signal'
+	option trigger 'default-on'
+
+config led
+	option name 'WIFI'
+	option sysfs 'green:wifi'
+	option trigger 'default-on'
+
+config led
+	option name 'INTERNET'
+	option sysfs 'green:internet'
+	option trigger 'netdev'
+	option dev 'br-lan'
+	list mode 'tx'
+	list mode 'rx'
+
+config led
+	option name 'PHONE'
+	option sysfs 'green:phone'
+	option trigger 'default-on'
+

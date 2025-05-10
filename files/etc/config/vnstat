@@ -1,0 +1,4 @@
+
+config vnstat
+	list interface 'br-lan'
+

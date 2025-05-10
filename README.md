@@ -1,5 +1,3 @@
-![image](https://github.com/user-attachments/assets/0e8490bd-eed7-4b56-ac96-61c832444ca3)
-
 NIALWRT-AW1K PROJECT
 
 Source: ImmortalWrt
@@ -76,5 +74,10 @@ Ensure you have sufficient disk space and memory for building.
 You can customize additional packages using make menuconfig after running the script.
 
 
-For more details, visit the GitHub repository.
+
+---
+
+Support & Donations
+
+If you find this project helpful and would like to support its development, you can donate or contact via Telegram: @NIALVPN
 

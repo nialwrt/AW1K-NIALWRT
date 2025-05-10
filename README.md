@@ -1,9 +1,8 @@
 ![Screenshot from 2025-05-10 18-09-18](https://github.com/user-attachments/assets/815a731d-5891-4cbb-a056-ccac53c3d85b)
 
-AW1K-NIALWRT PROJECT
+NIALWRT-AW1K PROJECT
 
 Source: ImmortalWrt
-
 Target OS: Ubuntu 22
 
 
@@ -14,6 +13,8 @@ Highlights
 Beginner-friendly auto script
 
 Flexible: easily add or remove packages
+
+Supports firmware and kernel version updates
 
 Default preset ready to use (plug-and-play)
 
@@ -74,7 +75,7 @@ Tested on Ubuntu 22.04 LTS.
 
 Ensure you have sufficient disk space and memory for building.
 
-You can customize additional packages using make menuconfig after running the script.
+You can update firmware or kernel versions and customize additional packages using make menuconfig.
 
 
 

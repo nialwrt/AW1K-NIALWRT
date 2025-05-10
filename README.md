@@ -1,6 +1,7 @@
-NIALWRT-AW1K PROJECT
+AW1K-NIALWRT PROJECT
 
 Source: ImmortalWrt
+
 Target OS: Ubuntu 22
 
 

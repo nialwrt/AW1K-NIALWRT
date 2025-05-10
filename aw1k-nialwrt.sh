@@ -1,18 +1,16 @@
 #!/bin/bash
 
-# Warna biru
+# Define colors
 BLUE='\033[1;34m'
 NC='\033[0m'
 
 clear
 echo -e "${BLUE}"
-echo "----------------------"
-echo "    AW1K-NIALWRT"
-echo "----------------------"
+echo "      AW1K-NIALWRT BUILD"
 echo -e "${NC}"
 
 # Install dependencies
-echo -e "${BLUE}MENGINSTALL DEPENDENCIES${NC}"
+echo -e "${BLUE}Installing required dependencies...${NC}"
 sudo apt update -y
 sudo apt full-upgrade -y
 sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
@@ -24,87 +22,88 @@ sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bis
     python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
     upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
 
-# Buang folder ImmortalWrt jika ada
+# Remove existing ImmortalWrt directory if present
 folder="immortalwrt"
 if [ -d "$folder" ]; then
-    echo -e "${BLUE}MENGHAPUS FOLDER $folder YANG SUDAH ADA${NC}"
+    echo -e "${BLUE}Removing existing '$folder' directory...${NC}"
     rm -rf "$folder"
 fi
 
-# Clone repo ImmortalWrt
+# Clone ImmortalWrt repository
 repo="https://github.com/immortalwrt/immortalwrt.git"
+echo -e "${BLUE}Cloning ImmortalWrt repository...${NC}"
 git clone $repo $folder
 
-# Clone preset repo
+# Clone preset repository
 preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 preset_folder="AW1K-NIALWRT"
 if [ -d "$preset_folder" ]; then
-    echo -e "${BLUE}MENGHAPUS FOLDER $preset_folder YANG SUDAH ADA${NC}"
+    echo -e "${BLUE}Removing existing '$preset_folder' directory...${NC}"
     rm -rf "$preset_folder"
 fi
+echo -e "${BLUE}Cloning preset repository...${NC}"
 git clone $preset_repo
 
-# Masuk ke folder ImmortalWrt
+# Enter ImmortalWrt directory
 cd $folder
 
 # Install feeds
-echo -e "${BLUE}MENGINSTALL FEEDS${NC}"
+echo -e "${BLUE}Setting up feeds...${NC}"
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# Pause untuk masukkan feeds custom
-echo -e "${BLUE}MASUKKAN JIKA ADA FEEDS LAIN${NC}"
-read -p "Tekan [Enter] untuk teruskan"
+# Pause for additional custom feeds
+echo -e "${BLUE}If you have any additional feeds, add them now.${NC}"
+read -p "Press [Enter] to continue..."
 
-# Update feeds
-echo -e "${BLUE}MENGUPDATE FEEDS${NC}"
+# Update feeds again
+echo -e "${BLUE}Updating all feeds...${NC}"
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# List branch dan tag
-echo -e "${BLUE}LIST BRANCH${NC}"
+# List available branches and tags
+echo -e "${BLUE}Available branches:${NC}"
 git branch -a
 
-echo -e "${BLUE}LIST TAG${NC}"
+echo -e "${BLUE}Available tags:${NC}"
 git tag | sort -V
 
-# Pilih branch/tag
-echo -ne "${BLUE}MASUKKAN BRANCH/TAG: ${NC}"
+# Prompt user for target branch or tag
+echo -ne "${BLUE}Enter target branch or tag to checkout: ${NC}"
 read TARGET_TAG
 git checkout $TARGET_TAG
 
-# Salin preset files dan config
-echo -e "${BLUE}MENYALIN PRESET FILES DAN CONFIG${NC}"
+# Copy preset files and config
+echo -e "${BLUE}Copying preset files and configuration...${NC}"
 cp -r ../$preset_folder/files ./
 cp ../$preset_folder/config-upload .config
 
-# Jalankan defconfig
-echo -e "${BLUE}MENJALANKAN DEFCONFIG${NC}"
+# Run defconfig
+echo -e "${BLUE}Applying defconfig...${NC}"
 make defconfig
 
-# Tanya user apakah mau buka menuconfig
-echo -ne "${BLUE}MAHU BUKA MENUCONFIG UNTUK MENAMBAH PACKAGE? (y/n): ${NC}"
-read jawaban
+# Ask if user wants to open menuconfig
+echo -ne "${BLUE}Do you want to open 'make menuconfig' to add or adjust packages? (y/n): ${NC}"
+read answer
 
-if [[ "$jawaban" == "y" || "$jawaban" == "Y" ]]; then
-    echo -e "${BLUE}MEMBUKA MENUCONFIG${NC}"
+if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+    echo -e "${BLUE}Launching menuconfig...${NC}"
     make menuconfig
 else
-    echo -e "${BLUE}SKIP MENUCONFIG${NC}"
+    echo -e "${BLUE}Skipping menuconfig step...${NC}"
 fi
 
-# Jalankan build
-echo -e "${BLUE}MENJALANKAN BUILD${NC}"
+# Start the build
+echo -e "${BLUE}Starting the build process...${NC}"
 start_time=$(date +%s)
 make -j$(nproc)
 end_time=$(date +%s)
 
+# Calculate build duration
 duration=$((end_time - start_time))
 hours=$((duration / 3600))
 minutes=$(((duration % 3600) / 60))
 
 echo -e "${BLUE}"
-echo "----------------------"
-echo "SELESAI: ${hours} jam ${minutes} min"
-echo "----------------------"
+echo "Build completed in: ${hours} hour(s) ${minutes} minute(s)"
 echo -e "${NC}"

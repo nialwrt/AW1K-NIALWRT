@@ -79,7 +79,7 @@ cp -r ../$preset_folder/files ./
 cp ../$preset_folder/config-upload .config
 
 # Jalankan defconfig
-echo -e "${BLUE}MENJALANKAN MAKE DEFCONFIG${NC}"
+echo -e "${BLUE}MENJALANKAN DEFCONFIG${NC}"
 make defconfig
 
 # Tanya user apakah mau buka menuconfig
@@ -90,7 +90,7 @@ if [[ "$jawaban" == "y" || "$jawaban" == "Y" ]]; then
     echo -e "${BLUE}MEMBUKA MENUCONFIG${NC}"
     make menuconfig
 else
-    echo -e "${BLUE}LEWATKAN MENUCONFIG, LANJUT BUILD${NC}"
+    echo -e "${BLUE}SKIP MENUCONFIG${NC}"
 fi
 
 # Jalankan build

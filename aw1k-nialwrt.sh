@@ -113,20 +113,24 @@ else
     echo -e "${BLUE}Skipping menuconfig step...${NC}"
 fi
 
-# Start the build
-echo -e "${BLUE}Starting the build process...${NC}"
+# Start build 
+echo -e "${BLUE}Starting build...${NC}"
 start_time=$(date +%s)
-make -j$(nproc)
+
+if make -j$(nproc); then
+    echo -e "${GREEN}Build succeeded.${NC}"
+else
+    echo -e "${RED}Build failed. Running make V=s for detailed error...${NC}"
+    make -j1 V=s
+fi
+
 end_time=$(date +%s)
 
-# Calculate build duration
+# Build duration
 duration=$((end_time - start_time))
 hours=$((duration / 3600))
 minutes=$(((duration % 3600) / 60))
-
-echo -e "${BLUE}"
-echo "Build completed in: ${hours} hour(s) ${minutes} minute(s)"
-echo -e "${NC}"
+echo -e "${BLUE}Build completed in: ${hours} hour(s) ${minutes} minute(s)${NC}"
 
 # Go back to parent directory
 cd ..

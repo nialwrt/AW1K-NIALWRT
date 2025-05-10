@@ -28,7 +28,7 @@ fi
 
 clear
 echo -e "${BLUE}"
-echo "AW1K-NIALWRT BUILD"
+echo "AW1K-NIALWRT"
 echo -e "${NC}"
 
 # Install dependencies

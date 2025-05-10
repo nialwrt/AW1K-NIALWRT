@@ -6,7 +6,7 @@ NC='\033[0m'
 
 clear
 echo -e "${BLUE}"
-echo "      AW1K-NIALWRT BUILD"
+echo "AW1K-NIALWRT BUILD"
 echo -e "${NC}"
 
 # Install dependencies

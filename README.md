@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/0e8490bd-eed7-4b56-ac96-61c832444ca3)
+
 NIALWRT-AW1K-PROJECT
 
 SOURCE IMMORTALWRT
@@ -56,4 +58,8 @@ WIFI PRESET
 
 LINK INSTALASI
 
+wget https://raw.githubusercontent.com/nialwrt/AW1K-NIALWRT/main/aw1k-nialwrt.sh
 
+chmod +x aw1k-nialwrt.sh
+
+./aw1k-nialwrt.sh

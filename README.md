@@ -48,7 +48,7 @@ OTHER PACKAGE
 
 -Theme argon
 
--sftp access
+-Sftp access
 
 WIFI PRESET
 

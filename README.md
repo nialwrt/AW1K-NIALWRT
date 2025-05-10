@@ -1,61 +1,80 @@
 ![image](https://github.com/user-attachments/assets/0e8490bd-eed7-4b56-ac96-61c832444ca3)
 
-NIALWRT-AW1K-PROJECT
+NIALWRT-AW1K PROJECT
 
-SOURCE IMMORTALWRT
+Source: ImmortalWrt
+Target OS: Ubuntu 22
 
-OS UBUNTU 22
 
-KELEBIHAN AUTOSCRIPT:
+---
 
-MEMUDAHKAN NEWBIE UNTUK BELAJAR
+Highlights
 
-FLEKSIBEL BOLEH TAMBAH PACKAGE
+Beginner-friendly auto script
 
-DEFAULT PRESET SUDAH PNP
+Flexible: easily add or remove packages
 
-TWEAK PRESET
+Default preset ready to use (plug-and-play)
 
--Bbr
 
--Zram
 
--Cpu freq
+---
 
--Enable all cpu
+Preset Tweaks
 
--Ttl64(for mod)
+BBR congestion control
 
--Proto quectelcm
+ZRAM swap
 
-PACKAGE PRESET
+CPU frequency scaling (all cores enabled)
 
--Htop
+TTL 64 (for modem compatibility)
 
--Traffic monitor
+Quectel-CM protocol support
 
--Release ram
 
--Terminal
 
--3ginfolite
+---
 
--Modem band
+Preset Packages
 
--Sms
+System tools: htop, traffic monitor, RAM releaser, terminal
 
-OTHER PACKAGE
+Modem tools: 3GInfo Lite, modem band selector, SMS tools
 
--Theme argon
+Extras: Argon theme, SFTP access
 
--Sftp access
 
-WIFI PRESET
 
--Ssid: AW1K / AW1K 5G
+---
 
--Password: nialwrt123
+Default WiFi Settings
 
-LINK INSTALASI
+SSID: AW1K / AW1K 5G
+
+Password: nialwrt123
+
+
+
+---
+
+Quick Installation
+
+Run this command in your terminal:
 
 wget https://raw.githubusercontent.com/nialwrt/AW1K-NIALWRT/main/aw1k-nialwrt.sh && chmod +x aw1k-nialwrt.sh && ./aw1k-nialwrt.sh
+
+
+---
+
+Notes
+
+Tested on Ubuntu 22.04 LTS.
+
+Ensure you have sufficient disk space and memory for building.
+
+You can customize additional packages using make menuconfig after running the script.
+
+
+For more details, visit the GitHub repository.
+

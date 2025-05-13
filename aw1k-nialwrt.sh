@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# Define colors
-BLUE='\033[1;34m'
+# Define colors (Ubuntu-like)
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
 NC='\033[0m'
+BOLD='\033[1m'
 
 folder="immortalwrt"
 preset_folder="AW1K-NIALWRT"
@@ -10,29 +13,25 @@ script_file="$(basename "$0")"
 
 # Check for --clean argument
 if [[ "$1" == "--clean" ]]; then
-    echo -e "${BLUE}Cleaning up directories and script...${NC}"
+    echo -e "${BLUE}${BOLD}Cleaning up directories and script...${NC}"
     if [ -d "$folder" ]; then
         echo -e "${BLUE}Removing '$folder' directory...${NC}"
-        rm -rf "$folder"
     fi
     if [ -d "$preset_folder" ]; then
         echo -e "${BLUE}Removing '$preset_folder' directory...${NC}"
-        rm -rf "$preset_folder"
     fi
     if [ -f "$script_file" ]; then
         echo -e "${BLUE}Removing script file '$script_file'...${NC}"
-        rm -f "$script_file"
     fi
     exit 0
 fi
 
 clear
-echo -e "${BLUE}"
-echo "AW1K-NIALWRT"
-echo -e "${NC}"
+echo -e "${BLUE}${BOLD}AW1K-NIALWRT Firmware Builder${NC}"
+echo ""
 
 # Install dependencies
-echo -e "${BLUE}Installing required dependencies...${NC}"
+echo -e "${BLUE}Installing required dependencies for ImmortalWrt...${NC}"
 sudo apt update -y
 sudo apt full-upgrade -y
 sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
@@ -47,90 +46,115 @@ sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bis
 # Remove existing ImmortalWrt directory if present
 if [ -d "$folder" ]; then
     echo -e "${BLUE}Removing existing '$folder' directory...${NC}"
-    rm -rf "$folder"
 fi
 
 # Clone ImmortalWrt repository
 repo="https://github.com/immortalwrt/immortalwrt.git"
 echo -e "${BLUE}Cloning ImmortalWrt repository...${NC}"
-git clone $repo $folder
+git clone "$repo" "$folder"
 
 # Clone preset repository
 if [ -d "$preset_folder" ]; then
     echo -e "${BLUE}Removing existing '$preset_folder' directory...${NC}"
-    rm -rf "$preset_folder"
 fi
 preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 echo -e "${BLUE}Cloning preset repository...${NC}"
-git clone $preset_repo
+git clone "$preset_repo"
 
 # Enter ImmortalWrt directory
-cd $folder
+cd "$folder"
 
-# Install feeds
+# Initial feeds setup
 echo -e "${BLUE}Setting up feeds...${NC}"
-./scripts/feeds update -a
-./scripts/feeds install -a
+./scripts/feeds update -a && ./scripts/feeds install -a
 
-# Pause for additional custom feeds
-echo -e "${BLUE}If you have any additional feeds, add them now.${NC}"
-read -p "Press [Enter] to continue..."
+# Prompt for custom feeds
+echo -e "${BLUE}You may now add custom feeds manually if needed.${NC}"
+read -p "Press Enter to continue..." temp
 
-# Update feeds again
-echo -e "${BLUE}Updating all feeds...${NC}"
-./scripts/feeds update -a
-./scripts/feeds install -a
+# Re-run feeds in loop if error
+while true; do
+    ./scripts/feeds update -a && ./scripts/feeds install -a && break
+    echo -e "${RED}${BOLD}Error:${NC} ${RED}Feeds update/install failed. Please address the issue, then press Enter to retry...${NC}"
+    read -r
+done
 
 # List available branches and tags
 echo -e "${BLUE}Available branches:${NC}"
 git branch -a
-
 echo -e "${BLUE}Available tags:${NC}"
 git tag | sort -V
 
 # Prompt user for target branch or tag
-echo -ne "${BLUE}Enter target branch or tag to checkout: ${NC}"
-read TARGET_TAG
-git checkout $TARGET_TAG
+while true; do
+    echo -ne "${BLUE}Enter the target branch or tag to checkout: ${NC}"
+    read TARGET_TAG
+    if git checkout "$TARGET_TAG"; then
+        break
+    else
+        echo -e "${RED}${BOLD}Error:${NC} ${RED}Invalid selection. Please try again.${NC}"
+    fi
+done
 
 # Copy preset files and config
 echo -e "${BLUE}Copying preset files and configuration...${NC}"
-cp -r ../$preset_folder/files ./
-cp ../$preset_folder/config-upload .config
+cp -r "../$preset_folder/files" ./
+cp "../$preset_folder/config-upload" .config
 
 # Run defconfig
-echo -e "${BLUE}Applying defconfig...${NC}"
+echo -e "${BLUE}Applying default configuration...${NC}"
 make defconfig
 
 # Ask if user wants to open menuconfig
-echo -ne "${BLUE}Do you want to open 'make menuconfig' to add or adjust packages? (y/n): ${NC}"
+echo -ne "${BLUE}Do you want to open '${BOLD}make menuconfig${NC}${BLUE}' to customize the build? (y/n): ${NC}"
 read answer
 
 if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
-    echo -e "${BLUE}Launching menuconfig...${NC}"
+    echo -e "${BLUE}Launching ${BOLD}menuconfig${NC}${BLUE}...${NC}"
     make menuconfig
 else
-    echo -e "${BLUE}Skipping menuconfig step...${NC}"
+    echo -e "${BLUE}Skipping menuconfig step.${NC}"
 fi
 
-# Start build 
-echo -e "${BLUE}Starting build...${NC}"
-start_time=$(date +%s)
+# Start build loop
+while true; do
+    echo -e "${BLUE}Starting build process...${NC}"
+    start_time=$(date +%s)
 
-if make -j$(nproc); then
-    echo -e "${GREEN}Build succeeded.${NC}"
-else
-    echo -e "${RED}Build failed. Running make V=s for detailed error...${NC}"
-    make -j1 V=s
-fi
+    if make -j"$(nproc)"; then
+        echo -e "${GREEN}${BOLD}Build completed successfully.${NC}"
+        break
+    else
+        echo -e "${RED}${BOLD}Error:${NC} ${RED}Build failed. Running '${BOLD}make V=s${NC}${RED}' for detailed output...${NC}"
+        make -j1 V=s
 
-end_time=$(date +%s)
+        echo -e "${RED}Please identify and resolve the error, then press Enter to continue...${NC}"
+        read -r
 
-# Build duration
-duration=$((end_time - start_time))
-hours=$((duration / 3600))
-minutes=$(((duration % 3600) / 60))
-echo -e "${BLUE}Build completed in: ${hours} hour(s) ${minutes} minute(s)${NC}"
+        # Feeds recovery
+        while true; do
+            ./scripts/feeds update -a && ./scripts/feeds install -a && break
+            echo -e "${RED}${BOLD}Error:${NC} ${RED}Feeds update/install failed. Please fix the issue and press Enter to retry...${NC}"
+            read -r
+        done
+
+        echo -e "${BLUE}Applying default configuration again...${NC}"
+        make defconfig
+
+        # Ask if user wants to open menuconfig again
+        read -p "$(echo -e ${BLUE}Do you want to open ${BOLD}menuconfig${NC}${BLUE} again? [y/N]: ${NC})" mc
+        if [[ "$mc" == "y" || "$mc" == "Y" ]]; then
+            make menuconfig
+        fi
+    fi
+
+    # Build duration
+    end_time=$(date +%s)
+    duration=$((end_time - start_time))
+    hours=$((duration / 3600))
+    minutes=$(((duration % 3600) / 60))
+    echo -e "${BLUE}Build duration: ${BOLD}${hours} hour(s)${NC}${BLUE} and ${BOLD}${minutes} minute(s)${NC}${BLUE}.${NC}"
+done
 
 # Go back to parent directory
 cd ..
@@ -138,11 +162,9 @@ cd ..
 # Cleanup preset folder
 if [ -d "$preset_folder" ]; then
     echo -e "${BLUE}Removing preset folder '$preset_folder'...${NC}"
-    rm -rf "$preset_folder"
 fi
 
 # Cleanup this script file
 if [ -f "$script_file" ]; then
     echo -e "${BLUE}Removing script file '$script_file'...${NC}"
-    rm -f "$script_file"
 fi

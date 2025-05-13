@@ -27,8 +27,11 @@ if [[ "$1" == "--clean" ]]; then
 fi
 
 clear
-echo -e "${BLUE}${BOLD}AW1K-NIALWRT Firmware Builder${NC}"
-echo ""
+echo -e "\e[34m--------------------------------------\e[0m"
+echo -e "\e[34m  AW1K-NIALWRT Firmware Build\e[0m"
+echo -e "\e[34m  github.com/nialwrt/AW1K-NIALWRT\e[0m"
+echo -e "\e[34m  Telegram: @NIALVPN\e[0m"
+echo -e "\e[34m--------------------------------------\e[0m"
 
 # Install dependencies
 echo -e "${BLUE}Installing required dependencies for ImmortalWrt...${NC}"

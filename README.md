@@ -7,8 +7,8 @@
 AW1K-NIALWRT is a beginner-friendly OpenWrt build script designed for quick deployment and daily use. It comes with a full set of pre-configured packages and system tweaks, making it ideal for users who want a plug-and-play solution without needing to configure everything from scratch.
 
 ## Features
-* **Ready-to-use Preset:** Comes with essential packages and system configurations tailored for optimal performance and modem support.
 * **Beginner Friendly:** Automates the entire build process — from dependencies to final firmware output.
+* **Ready-to-use Preset:** Comes with essential packages and system configurations tailored for optimal performance and modem support.
 * **Customizable via Menuconfig:** Offers flexibility to add, remove, or update packages and kernel versions via `make menuconfig`.
 
 ## Preset Tweaks

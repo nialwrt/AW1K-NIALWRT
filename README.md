@@ -28,8 +28,8 @@ AW1K-NIALWRT is a beginner-friendly OpenWrt build script designed for quick depl
 * **Password:** `nialwrt123`
 
 ## Requirements
-* Ubuntu 22.04 LTS or newer
 * Internet connection
+* Ubuntu 22.04 LTS or newer
 * Adequate disk space and RAM
 * Basic terminal usage knowledge
 

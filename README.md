@@ -21,7 +21,7 @@ AW1K-NIALWRT is a beginner-friendly OpenWrt build script designed for quick depl
 ## Preset Packages
 * **System tools:** `htop`, `traffic monitor`, `RAM releaser`, `terminal access`
 * **Modem tools:** `3GInfo Lite`, `modem band selector`, `SMS tools`
-* **Extras:** Argon theme, SFTP (OpenSSH) support
+* **Extras:** `Argon theme`, `SFTP (OpenSSH) support`
 
 ## Default WiFi Settings
 * **SSID:** `AW1K` / `AW1K 5G`

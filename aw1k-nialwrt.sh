@@ -171,13 +171,7 @@ rebuild_menu() {
                 ;;
             3)
                 log_step "Rebuilding with existing settings..."
-                make -j"$(nproc)" && {
-                    log_success "Rebuild success."
-                    show_output_location
-                    break
-                } || {
-                    log_error "Rebuild failed. Consider a fresh rebuild."
-                }
+                start_build
                 break
                 ;;
             *) log_error "Invalid selection."; ;;

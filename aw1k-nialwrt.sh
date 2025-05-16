@@ -182,9 +182,7 @@ rebuild_menu() {
 }
 
 cleanup() {
-    log_step "Cleaning up directories and files..."
-    rm -f "$script_file" && log_info "Script removed."
-    log_success "Cleanup complete."
+    rm -f "$script_file"
 }
 
 # Check for --clean argument
@@ -216,6 +214,4 @@ else
     build_menu
 fi
 
-log_info "Script done."
 cleanup
-log_success "Self-cleaned successfully."

@@ -72,7 +72,7 @@ run_menuconfig() {
 }
 
 show_output_location() {
-    log_info "Firmware output: ${YELLOW}$(pwd)/bin/targets/${NC}"
+    log_success "Location: ${YELLOW}$(pwd)/bin/targets/${NC}"
 }
 
 start_build() {

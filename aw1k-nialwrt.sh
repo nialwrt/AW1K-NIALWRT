@@ -159,8 +159,8 @@ rebuild_menu() {
             2)
                 log_step "Configuring and rebuilding (new .config)..."
                 log_step "deleting preset files and configuration..."
-                rm -rf "../$preset_folder/config-upload" .config
-                rm ".config"
+                rm -rf "./files"
+                rm -f ".config"
                 log_step "restore preset files and configuration..."
                 cp -r "../$preset_folder/files" ./
                 cp "../$preset_folder/config-upload" .config

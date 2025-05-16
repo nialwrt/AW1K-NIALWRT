@@ -183,8 +183,6 @@ rebuild_menu() {
 
 cleanup() {
     log_step "Cleaning up directories and files..."
-    rm -rf "$distro" && log_info "Directory '$distro' removed."
-    rm -rf "$preset_folder" && log_info "Directory '$preset_folder' removed."
     rm -f "$script_file" && log_info "Script removed."
     log_success "Cleanup complete."
 }

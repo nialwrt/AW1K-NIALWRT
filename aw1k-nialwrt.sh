@@ -1,40 +1,211 @@
 #!/bin/bash
 
-# Define colors (Ubuntu-like)
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-RED='\033[0;31m'
+script_file="$(basename "$0")"
+
+# Color codes
+BLUE='\033[1;34m'
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[1;36m'
+MAGENTA='\033[1;35m'
 NC='\033[0m'
 BOLD='\033[1m'
 
-folder="immortalwrt"
+# Distro and preset configuration
+distro="immortalwrt"
+repo="https://github.com/immortalwrt/immortalwrt.git"
 preset_folder="AW1K-NIALWRT"
-script_file="$(basename "$0")"
+preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
+
+# Logging functions
+log_info() { echo -e "${CYAN}>> ${NC}$1"; }
+log_warning() { echo -e "${YELLOW}${BOLD}>> WARNING:${NC} ${YELLOW}$1${NC}"; }
+log_error() { echo -e "${RED}${BOLD}>> ERROR:${NC} ${RED}${BOLD}$1${NC}"; }
+log_success() { echo -e "${GREEN}${BOLD}>> SUCCESS:${NC} ${GREEN}${BOLD}$1${NC}"; }
+log_step() { echo -e "${BLUE}${BOLD}>> STEP:${NC} ${BLUE}${BOLD}$1${NC}"; }
+
+prompt() {
+    echo -ne "$1"
+    read -r REPLY
+    eval "$2=\"\$REPLY\""
+}
+
+check_git() {
+    command -v git &>/dev/null || {
+        log_error "Git is required."
+        exit 1
+    }
+}
+
+main_menu() {
+    clear
+    echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
+    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT Firmware Build  ${NC}"
+    echo -e "${MAGENTA}  github.com/nialwrt        ${NC}"
+    echo -e "${MAGENTA}  Telegram: @NIALVPN                  ${NC}"
+    echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
+}
+
+update_feeds() {
+    log_step "Updating package lists (feeds)..."
+    ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
+    echo -ne "${BLUE}Press Enter after editing custom feeds... ${NC}"; read
+    ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
+    log_success "Package lists updated."
+}
+
+select_target() {
+    log_step "Selecting target branch/tag..."
+    echo -e "${YELLOW}Branches:${NC}"; git branch -a
+    echo -e "${YELLOW}Tags:${NC}"; git tag | sort -V
+    while true; do
+        prompt "${BLUE}Enter branch/tag to checkout: ${NC}" target_tag
+        git checkout "$target_tag" && { log_success "Checked out to: $target_tag"; break; }
+        log_error "Invalid branch/tag."
+    done
+}
+
+run_menuconfig() {
+    log_step "Running menuconfig..."
+    make menuconfig && log_success "Configuration saved." || log_error "Configuration failed."
+}
+
+show_output_location() {
+    log_info "Firmware output: ${YELLOW}$(pwd)/bin/targets/${NC}"
+}
+
+start_build() {
+    log_step "Building firmware..."
+    local MAKE_J=$(nproc)
+    log_info "Using make -j${MAKE_J}"
+
+    while true; do
+        local start_time=$(date +%s)
+        make -j"${MAKE_J}" && {
+            local duration=$(( $(date +%s) - start_time ))
+            local hours=$((duration / 3600))
+            local minutes=$(((duration % 3600) / 60))
+            local seconds=$((duration % 60))
+
+            log_success "Build finished in ${hours}h ${minutes}m ${seconds}s."
+            show_output_location
+            break
+        }
+
+        log_error "Build failed. Debugging with verbose output..."
+        make -j1 V=s
+        echo -ne "${RED}Fix errors, then press Enter to retry... ${NC}"
+        read
+
+        make distclean
+        update_feeds || return 1
+        select_target
+        run_menuconfig
+
+        local retry_start=$(date +%s)
+        make -j"${MAKE_J}" && {
+            local retry_duration=$(( $(date +%s) - retry_start ))
+            local rh=$((retry_duration / 3600))
+            local rm=$(((retry_duration % 3600) / 60))
+            local rs=$((retry_duration % 60))
+
+            log_success "Rebuild (after fallback) finished in ${rh}h ${rm}m ${rs}s."
+            show_output_location
+        } || log_error "Build still failed after fallback."
+
+        break
+    done
+}
+
+build_menu() {
+    log_step "Starting first-time build..."
+    git clone "$repo" "$distro" || { log_error "Git clone failed."; exit 1; }
+    git clone "$preset_repo" "$preset_folder" || { log_error "Git clone preset failed."; exit 1; }
+    pushd "$distro" > /dev/null || exit 1
+    update_feeds || exit 1
+    select_target
+    cp -r "../$preset_folder/files" ./
+    cp "../$preset_folder/config-upload" .config
+    make defconfig
+    run_menuconfig
+    start_build
+    popd > /dev/null
+}
+
+rebuild_menu() {
+    pushd "$distro" > /dev/null || exit 1
+    echo -e "${BLUE}${BOLD}Rebuild Options:${NC}"
+    echo "1) Fresh Rebuild (clean and reconfigure)"
+    echo "2) Configure and Rebuild (new .config)"
+    echo "3) Existing Rebuild (use current config)"
+
+    while true; do
+        prompt "${YELLOW}Select option [1/2/3]: ${NC}" opt
+        case "$opt" in
+            1)
+                log_step "Performing fresh rebuild..."
+                make distclean
+                update_feeds || return 1
+                select_target
+                log_step "Copying preset files and configuration..."
+                cp -r "../$preset_folder/files" ./
+                cp "../$preset_folder/config-upload" .config
+                make defconfig
+                run_menuconfig
+                start_build
+                break
+                ;;
+            2)
+                log_step "Configuring and rebuilding (new .config)..."
+                run_menuconfig && {
+                    make -j"$(nproc)" && {
+                        log_success "Rebuild success."
+                        show_output_location
+                        break
+                    } || {
+                        log_error "Build failed."
+                    }
+                } || log_error "Configuration failed."
+                break
+                ;;
+            3)
+                log_step "Rebuilding with existing settings..."
+                make -j"$(nproc)" && {
+                    log_success "Rebuild success."
+                    show_output_location
+                    break
+                } || {
+                    log_error "Rebuild failed. Consider a fresh rebuild."
+                }
+                break
+                ;;
+            *) log_error "Invalid selection."; ;;
+        esac
+    done
+
+    popd > /dev/null
+}
+
+cleanup() {
+    log_step "Cleaning up directories and files..."
+    rm -rf "$distro" && log_info "Directory '$distro' removed."
+    rm -rf "$preset_folder" && log_info "Directory '$preset_folder' removed."
+    rm -f "$script_file" && log_info "Script removed."
+    log_success "Cleanup complete."
+}
 
 # Check for --clean argument
 if [[ "$1" == "--clean" ]]; then
-    echo -e "${BLUE}${BOLD}Cleaning up directories and script...${NC}"
-    if [ -d "$folder" ]; then
-        echo -e "${BLUE}Removing '$folder' directory...${NC}"
-    fi
-    if [ -d "$preset_folder" ]; then
-        echo -e "${BLUE}Removing '$preset_folder' directory...${NC}"
-    fi
-    if [ -f "$script_file" ]; then
-        echo -e "${BLUE}Removing script file '$script_file'...${NC}"
-    fi
+    cleanup
     exit 0
 fi
 
-clear
-echo -e "\e[34m--------------------------------------\e[0m"
-echo -e "\e[34m  AW1K-NIALWRT Firmware Build\e[0m"
-echo -e "\e[34m  github.com/nialwrt/AW1K-NIALWRT\e[0m"
-echo -e "\e[34m  Telegram: @NIALVPN\e[0m"
-echo -e "\e[34m--------------------------------------\e[0m"
+check_git
+main_menu
 
 # Install dependencies
-echo -e "${BLUE}Installing required dependencies for ImmortalWrt...${NC}"
+log_step "Installing dependencies required for ImmortalWrt..."
 sudo apt update -y
 sudo apt full-upgrade -y
 sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
@@ -46,128 +217,13 @@ sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bis
     python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
     upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
 
-# Remove existing ImmortalWrt directory if present
-if [ -d "$folder" ]; then
-    echo -e "${BLUE}Removing existing '$folder' directory...${NC}"
-fi
-
-# Clone ImmortalWrt repository
-repo="https://github.com/immortalwrt/immortalwrt.git"
-echo -e "${BLUE}Cloning ImmortalWrt repository...${NC}"
-git clone "$repo" "$folder"
-
-# Clone preset repository
-if [ -d "$preset_folder" ]; then
-    echo -e "${BLUE}Removing existing '$preset_folder' directory...${NC}"
-fi
-preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
-echo -e "${BLUE}Cloning preset repository...${NC}"
-git clone "$preset_repo"
-
-# Enter ImmortalWrt directory
-cd "$folder"
-
-# Initial feeds setup
-echo -e "${BLUE}Setting up feeds...${NC}"
-./scripts/feeds update -a && ./scripts/feeds install -a
-
-# Prompt for custom feeds
-echo -e "${BLUE}You may now add custom feeds manually if needed.${NC}"
-read -p "Press Enter to continue..." temp
-
-# Re-run feeds in loop if error
-while true; do
-    ./scripts/feeds update -a && ./scripts/feeds install -a && break
-    echo -e "${RED}${BOLD}Error:${NC} ${RED}Feeds update/install failed. Please address the issue, then press Enter to retry...${NC}"
-    read -r
-done
-
-# List available branches and tags
-echo -e "${BLUE}Available branches:${NC}"
-git branch -a
-echo -e "${BLUE}Available tags:${NC}"
-git tag | sort -V
-
-# Prompt user for target branch or tag
-while true; do
-    echo -ne "${BLUE}Enter the target branch or tag to checkout: ${NC}"
-    read TARGET_TAG
-    if git checkout "$TARGET_TAG"; then
-        break
-    else
-        echo -e "${RED}${BOLD}Error:${NC} ${RED}Invalid selection. Please try again.${NC}"
-    fi
-done
-
-# Copy preset files and config
-echo -e "${BLUE}Copying preset files and configuration...${NC}"
-cp -r "../$preset_folder/files" ./
-cp "../$preset_folder/config-upload" .config
-
-# Run defconfig
-echo -e "${BLUE}Applying default configuration...${NC}"
-make defconfig
-
-# Ask if user wants to open menuconfig
-echo -ne "${BLUE}Do you want to open '${BOLD}make menuconfig${NC}${BLUE}' to customize the build? (y/n): ${NC}"
-read answer
-
-if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
-    echo -e "${BLUE}Launching ${BOLD}menuconfig${NC}${BLUE}...${NC}"
-    make menuconfig
+if [ -d "$distro" ]; then
+    echo -e "${BLUE}${BOLD}Directory '$distro' exists.${NC}"
+    rebuild_menu
 else
-    echo -e "${BLUE}Skipping menuconfig step.${NC}"
+    build_menu
 fi
 
-# Start build loop
-while true; do
-    echo -e "${BLUE}Starting build process...${NC}"
-    start_time=$(date +%s)
-
-    if make -j"$(nproc)"; then
-        echo -e "${GREEN}${BOLD}Build completed successfully.${NC}"
-        break
-    else
-        echo -e "${RED}${BOLD}Error:${NC} ${RED}Build failed. Running '${BOLD}make V=s${NC}${RED}' for detailed output...${NC}"
-        make -j1 V=s
-
-        echo -e "${RED}Please identify and resolve the error, then press Enter to continue...${NC}"
-        read -r
-
-        # Feeds recovery
-        while true; do
-            ./scripts/feeds update -a && ./scripts/feeds install -a && break
-            echo -e "${RED}${BOLD}Error:${NC} ${RED}Feeds update/install failed. Please fix the issue and press Enter to retry...${NC}"
-            read -r
-        done
-
-        echo -e "${BLUE}Applying default configuration again...${NC}"
-        make defconfig
-
-        # Ask if user wants to open menuconfig again
-        read -p "$(echo -e ${BLUE}Do you want to open ${BOLD}menuconfig${NC}${BLUE} again? [y/N]: ${NC})" mc
-        if [[ "$mc" == "y" || "$mc" == "Y" ]]; then
-            make menuconfig
-        fi
-    fi
-
-    # Build duration
-    end_time=$(date +%s)
-    duration=$((end_time - start_time))
-    hours=$((duration / 3600))
-    minutes=$(((duration % 3600) / 60))
-    echo -e "${BLUE}Build duration: ${BOLD}${hours} hour(s)${NC}${BLUE} and ${BOLD}${minutes} minute(s)${NC}${BLUE}.${NC}"
-done
-
-# Go back to parent directory
-cd ..
-
-# Cleanup preset folder
-if [ -d "$preset_folder" ]; then
-    echo -e "${BLUE}Removing preset folder '$preset_folder'...${NC}"
-fi
-
-# Cleanup this script file
-if [ -f "$script_file" ]; then
-    echo -e "${BLUE}Removing script file '$script_file'...${NC}"
-fi
+log_info "Script done."
+cleanup
+log_success "Self-cleaned successfully."

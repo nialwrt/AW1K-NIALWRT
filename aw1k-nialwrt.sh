@@ -158,15 +158,15 @@ rebuild_menu() {
                 ;;
             2)
                 log_step "Configuring and rebuilding (new .config)..."
-                run_menuconfig && {
-                    make -j"$(nproc)" && {
-                        log_success "Rebuild success."
-                        show_output_location
-                        break
-                    } || {
-                        log_error "Build failed."
-                    }
-                } || log_error "Configuration failed."
+                log_step "deleting preset files and configuration..."
+                rm -rf "../$preset_folder/config-upload" .config
+                rm ".config"
+                log_step "restore preset files and configuration..."
+                cp -r "../$preset_folder/files" ./
+                cp "../$preset_folder/config-upload" .config
+                make defconfig
+                run_menuconfig
+                start_build
                 break
                 ;;
             3)

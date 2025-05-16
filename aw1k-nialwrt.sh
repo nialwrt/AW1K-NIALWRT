@@ -20,10 +20,10 @@ preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 
 # Logging functions
 log_info() { echo -e "${CYAN}>> ${NC}$1"; }
-log_warning() { echo -e "${YELLOW}${BOLD}>> WARNING:${NC} ${YELLOW}$1${NC}"; }
-log_error() { echo -e "${RED}${BOLD}>> ERROR:${NC} ${RED}${BOLD}$1${NC}"; }
-log_success() { echo -e "${GREEN}${BOLD}>> SUCCESS:${NC} ${GREEN}${BOLD}$1${NC}"; }
-log_step() { echo -e "${BLUE}${BOLD}>> STEP:${NC} ${BLUE}${BOLD}$1${NC}"; }
+log_warning() { echo -e "${YELLOW}${BOLD}WARNING:${NC} ${YELLOW}$1${NC}"; }
+log_error() { echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}$1${NC}"; }
+log_success() { echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}$1${NC}"; }
+log_step() { echo -e "${BLUE}${BOLD}STEP:${NC} ${BLUE}${BOLD}$1${NC}"; }
 
 prompt() {
     echo -ne "$1"

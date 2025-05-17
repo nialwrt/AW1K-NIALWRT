@@ -84,7 +84,7 @@ ensure_preset() {
             echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
             exit 1
         }
-        echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully re-downloaded."
+        echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfull."
     fi
 }
 
@@ -154,6 +154,7 @@ build_menu() {
     pushd "$distro" > /dev/null || exit 1
     update_feeds || exit 1
     select_target
+    ensure_preset
     cp -r "../$preset_folder/files" ./
     cp "../$preset_folder/config-upload" .config
     make defconfig
@@ -178,6 +179,7 @@ rebuild_menu() {
                 make distclean
                 update_feeds || return 1
                 select_target
+                ensure_preset
                 echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Copying preset files and configuration...${NC}"
                 cp -r "../$preset_folder/files" ./
                 cp "../$preset_folder/config-upload" .config
@@ -192,7 +194,7 @@ rebuild_menu() {
                 rm -rf "./files"
                 rm -f ".config"
                 echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}restore preset files and configuration...${NC}"
-
+                ensure_preset
                 cp -r "../$preset_folder/files" ./
                 cp "../$preset_folder/config-upload" .config
                 make defconfig

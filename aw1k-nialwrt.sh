@@ -144,9 +144,9 @@ build_menu() {
 rebuild_menu() {
     cd "$distro" || exit 1
     echo -e "${BLUE}Rebuild Options:${NC}"
-    echo "1) Fresh Rebuild (clean)"
-    echo "2) Rebuild with New Config"
-    echo "3) Continue with Existing Config"
+    echo "1) Firmware & Package update"
+    echo "2) Firmware Update"
+    echo "3) Existing update"
 
     while true; do
         prompt "${YELLOW}Choose option [1/2/3]: ${NC}" opt

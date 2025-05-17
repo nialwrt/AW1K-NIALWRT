@@ -52,89 +52,80 @@ main_menu() {
 }
 
 update_feeds() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Updating package lists (feeds)...${NC}"
+    echo -e "${CYAN}${BOLD}STEP:${NC} Updating package lists (feeds)..."
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -ne "${BLUE}Press Enter after editing custom feeds... ${NC}";
+    echo -ne "${BLUE}Press Enter after editing feeds (if needed)... ${NC}"
     read
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Package lists updated.${NC}"
+    echo -e "${GREEN}${BOLD}SUCCESS:${NC} Feeds updated."
 }
 
 select_target() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Selecting target branch/tag...${NC}"
-    echo -e "${YELLOW}Branches:${NC}";
+    echo -e "${CYAN}${BOLD}STEP:${NC} Selecting target branch/tag..."
+    echo -e "${YELLOW}Branches:${NC}"
     git branch -a
-    echo -e "${YELLOW}Tags:${NC}";
+    echo -e "${YELLOW}Tags:${NC}"
     git tag | sort -V
-    while true;
-    do
+    while true; do
         prompt "${BLUE}Enter branch/tag to checkout: ${NC}" target_tag
         git checkout "$target_tag" && {
-            echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Checked out to: $target_tag${NC}"
-            break;
+            echo -e "${GREEN}${BOLD}Checked out to: $target_tag${NC}"
+            break
         }
-        echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Invalid branch/tag.${NC}"
+        echo -e "${RED}${BOLD}Invalid branch/tag.${NC}"
     done
 }
 
 ensure_preset() {
-    local preset_path="$preset_folder"
+    echo -e "${YELLOW}Cleaning existing preset and config..."
+    rm -rf ./files .config
 
-    echo -e "${YELLOW}${BOLD}NOTICE:${NC} Cleaning existing preset files and config..."
-    rm -rf ./files
-    rm -f ./.config
-
-    if [[ -d "$preset_path" ]]; then
-        echo -e "${YELLOW}${BOLD}NOTICE:${NC} Removing old preset folder..."
-        rm -rf "$preset_path"
+    if [[ -d "$preset_folder" ]]; then
+        echo -e "${YELLOW}Removing old preset folder...${NC}"
+        rm -rf "$preset_folder"
     fi
 
-    echo -e "${CYAN}${BOLD}STEP:${NC} Cloning preset from $preset_repo..."
-    git clone "$preset_repo" "$preset_path" || {
-        echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
+    echo -e "${CYAN}Cloning preset from $preset_repo..."
+    git clone "$preset_repo" "$preset_folder" || {
+        echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset."
         exit 1
     }
 
-    echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully cloned."
+    echo -e "${GREEN}Preset cloned successfully.${NC}"
 }
 
 apply_preset() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} Copying preset files and configuration..."
+    echo -e "${CYAN}Copying preset files and config..."
     cp -r "$preset_folder/files" ./
     cp "$preset_folder/config-upload" .config
 }
 
 run_menuconfig() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Running menuconfig...${NC}"
-    make menuconfig && echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Configuration saved.${NC}" || echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Configuration failed.${NC}"
+    echo -e "${CYAN}Running menuconfig..."
+    make menuconfig && echo -e "${GREEN}Saved configuration.${NC}" || echo -e "${RED}menuconfig failed.${NC}"
 }
 
 show_output_location() {
-    echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Firmware output: ${YELLOW}$(pwd)/bin/targets/${NC}"
+    echo -e "${GREEN}Firmware output: ${YELLOW}$(pwd)/bin/targets/${NC}"
 }
 
 start_build() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Building firmware...${NC}"
+    echo -e "${CYAN}Building firmware..."
     local MAKE_J=$(nproc)
-    echo -e "${CYAN}Using make -j${MAKE_J}${NC}"
+    echo -e "Using make -j${MAKE_J}"
 
-    while true;
-    do
+    while true; do
         local start_time=$(date +%s)
-        make -j"${MAKE_J}" && {
+        make -j"$MAKE_J" && {
             local duration=$(( $(date +%s) - start_time ))
-            local hours=$((duration / 3600))
-            local minutes=$(((duration % 3600) / 60))
-            local seconds=$((duration % 60))
-
-            echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Build finished in ${hours}h ${minutes}m ${seconds}s.${NC}"
+            printf "${GREEN}Build finished in %02dh %02dm %02ds${NC}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
             show_output_location
             break
         }
 
-        echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Build failed. Debugging with verbose output...${NC}"
+        echo -e "${RED}Build failed. Retrying with verbose output...${NC}"
         make -j1 V=s
-        echo -ne "${RED}Fix errors, then press Enter to retry... ${NC}"
+        echo -ne "${YELLOW}Fix the error. Press Enter to retry with clean build...${NC}"
         read
 
         make distclean
@@ -143,28 +134,29 @@ start_build() {
         run_menuconfig
 
         local retry_start=$(date +%s)
-        make -j"${MAKE_J}" && {
+        make -j"$MAKE_J" && {
             local retry_duration=$(( $(date +%s) - retry_start ))
-            local rh=$((retry_duration / 3600))
-            local rm=$(((retry_duration % 3600) / 60))
-
-            local rs=$((retry_duration % 60))
-
-            echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Rebuild (after fallback) finished in ${rh}h ${rm}m ${rs}s.${NC}"
+            printf "${GREEN}Rebuild finished in %02dh %02dm %02ds${NC}\n" $((retry_duration/3600)) $(((retry_duration%3600)/60)) $((retry_duration%60))
             show_output_location
-        } || echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Build still failed after fallback.${NC}"
+        } || echo -e "${RED}Build still failed after retry.${NC}"
         break
     done
 }
 
+cleanup() {
+    echo -e "${YELLOW}${BOLD}Cleaning up build script and preset files...${NC}"
+    rm -f "$script_file"
+    rm -rf "$preset_folder"
+}
+
 build_menu() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Starting first-time build...${NC}"
-    git clone "$repo" "$distro" || {
-        echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Git clone failed.${NC}"
+    echo -e "${CYAN}Cloning repo: $repo..."
+    git clone --depth=1 "$repo" "$distro" || {
+        echo -e "${RED}Git clone failed.${NC}"
         exit 1
     }
 
-    pushd "$distro" > /dev/null || exit 1
+    cd "$distro" || exit 1
     update_feeds || exit 1
     select_target
     ensure_preset
@@ -172,22 +164,20 @@ build_menu() {
     make defconfig
     run_menuconfig
     start_build
-    popd > /dev/null
+    cleanup
 }
 
 rebuild_menu() {
-    pushd "$distro" > /dev/null || exit 1
-    echo -e "${BLUE}${BOLD}Rebuild Options:${NC}"
-    echo -e "1) Fresh Rebuild (clean and reconfigure)"
-    echo -e "2) Configure and Rebuild (new .config)"
-    echo -e "3) Existing Rebuild (use current config)"
+    cd "$distro" || exit 1
+    echo -e "${BLUE}Rebuild Options:${NC}"
+    echo "1) Fresh Rebuild (clean)"
+    echo "2) Rebuild with New Config"
+    echo "3) Continue with Existing Config"
 
-    while true;
-    do
-        prompt "${YELLOW}Select option [1/2/3]: ${NC}" opt
+    while true; do
+        prompt "${YELLOW}Choose option [1/2/3]: ${NC}" opt
         case "$opt" in
             1)
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Fresh Rebuild...${NC}"
                 make distclean
                 update_feeds || return 1
                 select_target
@@ -196,37 +186,30 @@ rebuild_menu() {
                 make defconfig
                 run_menuconfig
                 start_build
+                cleanup
                 break
                 ;;
             2)
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Configure and Rebuild...${NC}"
                 select_target
                 ensure_preset
                 apply_preset
                 make defconfig
                 run_menuconfig
                 start_build
+                cleanup
                 break
                 ;;
             3)
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Rebuilding with existing settings...${NC}"
                 start_build
+                cleanup
                 break
                 ;;
             *)
-                echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Invalid selection.${NC}"
-                ;;
+                echo -e "${RED}Invalid choice.${NC}" ;;
         esac
     done
-
-    popd > /dev/null
 }
 
-cleanup() {
-    rm -f "$script_file"    
-}
-
-# Check for --clean argument
 if [[ "$1" == "--clean" ]]; then
     cleanup
     exit 0
@@ -235,17 +218,13 @@ fi
 check_git
 main_menu
 
-# Install dependencies
-echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Installing dependencies required for ImmortalWrt...${NC}"
-sudo apt update -y
-sudo apt full-upgrade -y
+echo -e "${CYAN}Installing build dependencies...${NC}"
+sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 
-if [ -d "$distro" ]; then
-    echo -e "${BLUE}${BOLD}Directory '$distro' exists.${NC}"
+if [ -d "$distro/.git" ]; then
+    echo -e "${BLUE}Directory '$distro' already exists.${NC}"
     rebuild_menu
 else
     build_menu
 fi
-
-cleanup

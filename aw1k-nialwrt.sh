@@ -3,9 +3,9 @@
 script_path="$(realpath "$0")"
 
 # Reset & style
-RESET='\033[0m' BOLD='\033[1m'
-BLACK='\033[30m'; RED='\033[31m'; GREEN='\033[32m'; YELLOW='\033[33m'
-BLUE='\033[34m'; MAGENTA='\033[35m'; CYAN='\033[36m'; WHITE='\033[37m'
+RESET='\e[0m' BOLD='\e[1m'
+BLACK='\e[30m'; RED='\e[31m'; GREEN='\e[32m'; YELLOW='\e[33m'
+BLUE='\e[34m'; MAGENTA='\e[35m'; CYAN='\e[36m'; WHITE='\e[37m'
 BOLD_BLACK="${BOLD}${BLACK}"; BOLD_RED="${BOLD}${RED}"; BOLD_GREEN="${BOLD}${GREEN}"
 BOLD_YELLOW="${BOLD}${YELLOW}"; BOLD_BLUE="${BOLD}${BLUE}"; BOLD_MAGENTA="${BOLD}${MAGENTA}"
 BOLD_CYAN="${BOLD}${CYAN}"; BOLD_WHITE="${BOLD}${WHITE}"

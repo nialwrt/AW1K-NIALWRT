@@ -71,7 +71,7 @@ main_menu() {
 update_feeds() {
     echo -e "${BOLD_BLUE}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    prompt "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}"
+    prompt "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}";
     read
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
     echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"

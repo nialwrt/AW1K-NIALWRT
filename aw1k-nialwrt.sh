@@ -66,6 +66,7 @@ main_menu() {
     echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt            ${RESET}"
     echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                    ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
+    echo -e "${BOLD_BLUE}BUILD MENU:${RESET}"
 }
 
 update_feeds() {
@@ -154,11 +155,12 @@ rebuild_menu() {
     clear
     cd "$distro" || exit 1
 
-    echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-    echo -e "${BOLD_MAGENTA}          AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-    echo -e "${BOLD_MAGENTA}          https://github.com/nialwrt            ${RESET}"
-    echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                    ${RESET}"
-    echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
+    clear
+    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
+    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
+    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt            ${RESET}"
+    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                    ${RESET}"
+    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_BLUE}REBUILD MENU:${RESET}"
     echo -e "1)FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
     echo -e "2)FIRMWARE UPDATE (FAST REBUILD)"

@@ -158,18 +158,21 @@ build_menu() {
 rebuild_menu() {
     clear
     cd "$distro" || exit 1
-    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
-    echo -e "${BOLD_MAGENTA}  HTTPS://GITHUB.COM/NIALWRT          ${RESET}"
-    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                  ${RESET}"
-    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-    echo -e "${BOLD_MAGENTA}REBUILD OPTIONS:${RESET}"
-    echo -e "${BOLD_MAGENTA}1) FIRMWARE & PACKAGE UPDATE${RESET}"
-    echo -e "${BOLD_MAGENTA}2) FIRMWARE UPDATE${RESET}"
-    echo -e "${BOLD_MAGENTA}3) EXISTING UPDATE${RESET}"
+
+    echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
+    echo -e "${BOLD_MAGENTA}        AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
+    echo -e "${BOLD_MAGENTA}        https://github.com/nialwrt          ${RESET}"
+    echo -e "${BOLD_MAGENTA}        Telegram: @nialvpn                  ${RESET}"
+    echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
+    echo
+    echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
+    echo -e "${BOLD_CYAN}1)${RESET} Firmware & Package Update (full rebuild)"
+    echo -e "${BOLD_CYAN}2)${RESET} Firmware Update (fast rebuild)"
+    echo -e "${BOLD_CYAN}3)${RESET} Existing Config Build (no changes)"
+    echo
 
     while true; do
-        prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
+        prompt "${BOLD_BLUE}Choose option [1/2/3]: ${RESET}" opt
         case "$opt" in
             1)
                 make distclean
@@ -199,7 +202,7 @@ rebuild_menu() {
                 break
                 ;;
             *)
-                echo -e "${BOLD_RED}INVALID CHOICE.${RESET}" ;;
+                echo -e "${BOLD_RED}Invalid choice. Please enter 1, 2, or 3.${RESET}" ;;
         esac
     done
 }

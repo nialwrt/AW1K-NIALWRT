@@ -25,6 +25,7 @@ deps=(ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essen
     ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils
     python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs
     upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd)
+
 choice=""
 target_tag=""
 opt=""
@@ -37,119 +38,85 @@ prompt() {
 
 check_git() {
     command -v git &>/dev/null || {
-        echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Git is required.${NC}"
+        echo -e "${RED}${BOLD}ERROR:${NC} Git is required."
         exit 1
     }
 }
 
 main_menu() {
     clear
-    echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
-    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT Firmware Build  ${NC}"
-    echo -e "${MAGENTA}  github.com/nialwrt          ${NC}"
-    echo -e "${MAGENTA}  Telegram: @NIALVPN                  ${NC}"
-    echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
+    echo -e "${MAGENTA}${BOLD}AW1K-NIALWRT Firmware Build${NC}"
+    echo -e "github.com/nialwrt | Telegram: @NIALVPN"
+    echo -e "--------------------------------------"
 }
 
 update_feeds() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} Updating package lists (feeds)..."
+    echo -e "${CYAN}Updating feeds...${NC}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -ne "${BLUE}Press Enter after editing feeds (if needed)... ${NC}"
+    echo -ne "Edit feeds if needed, then press Enter: "
     read
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -e "${GREEN}${BOLD}SUCCESS:${NC} Feeds updated."
+    echo -e "${GREEN}Feeds updated.${NC}"
 }
 
 select_target() {
-    echo -e "${CYAN}${BOLD}STEP:${NC} Selecting target branch/tag..."
+    echo -e "${CYAN}Select branch or tag:${NC}"
     git fetch --all --tags
 
-    echo -e "${YELLOW}Branches:${NC}"
+    echo -e "Branches:"
     git branch -r | sed 's|origin/||' | grep -v 'HEAD' | sort -u
     
-    echo -e "${YELLOW}Tags:${NC}"
+    echo -e "Tags:"
     git tag | sort -V
 
     while true; do
-        prompt "${BLUE}Enter branch or tag to checkout: ${NC}" target_tag
+        prompt "Enter branch or tag: " target_tag
         if git checkout "$target_tag" 2>/dev/null; then
-            echo -e "${GREEN}${BOLD}Checked out to: $target_tag${NC}"
+            echo -e "${GREEN}Checked out to $target_tag${NC}"
             break
         else
-            echo -e "${RED}${BOLD}Invalid branch or tag: $target_tag${NC}"
+            echo -e "${RED}Invalid branch/tag: $target_tag${NC}"
         fi
     done
 }
 
 ensure_preset() {
-    echo -e "${YELLOW}Cleaning existing preset and config..."
-    rm -rf ./files .config
-
-    if [[ -d "$preset_folder" ]]; then
-        echo -e "${YELLOW}Removing old preset folder...${NC}"
-        rm -rf "$preset_folder"
-    fi
-
-    echo -e "${CYAN}Cloning preset from $preset_repo..."
-    git clone "$preset_repo" "$preset_folder" || {
-        echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset."
-        exit 1
-    }
-
-    echo -e "${GREEN}Preset cloned successfully.${NC}"
+    echo -e "${YELLOW}Cleaning old preset and config...${NC}"
+    rm -rf ./files .config "$preset_folder"
+    echo -e "Cloning preset from $preset_repo..."
+    git clone "$preset_repo" "$preset_folder" || { echo -e "${RED}Failed to clone preset.${NC}"; exit 1; }
+    echo -e "${GREEN}Preset cloned.${NC}"
 }
 
 apply_preset() {
-    echo -e "${CYAN}Copying preset files and config..."
+    echo -e "Applying preset files and config..."
     cp -r "$preset_folder/files" ./
     cp "$preset_folder/config-upload" .config
 }
 
 run_menuconfig() {
-    echo -e "${CYAN}Running menuconfig..."
-    make menuconfig && echo -e "${GREEN}Saved configuration.${NC}" || echo -e "${RED}menuconfig failed.${NC}"
-}
-
-show_output_location() {
-    echo -e "${GREEN}Firmware output: ${YELLOW}$(pwd)/bin/targets/${NC}"
+    echo -e "Running menuconfig..."
+    if make menuconfig; then
+        echo -e "${GREEN}Configuration saved.${NC}"
+    else
+        echo -e "${RED}menuconfig failed.${NC}"
+    fi
 }
 
 start_build() {
-    echo -e "${CYAN}Building firmware..."
-    local MAKE_J=$(nproc)
-    echo -e "Using make -j${MAKE_J}"
-
-    while true; do
-        local start_time=$(date +%s)
-        make -j"$MAKE_J" && {
-            local duration=$(( $(date +%s) - start_time ))
-            printf "${GREEN}Build finished in %02dh %02dm %02ds${NC}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
-            show_output_location
-            break
-        }
-
-        echo -e "${RED}Build failed. Retrying with verbose output...${NC}"
-        make -j1 V=s
-        echo -ne "${YELLOW}Fix the error. Press Enter to retry with clean build...${NC}"
-        read
-
-        make distclean
-        update_feeds || return 1
-        select_target
-        run_menuconfig
-
-        local retry_start=$(date +%s)
-        make -j"$MAKE_J" && {
-            local retry_duration=$(( $(date +%s) - retry_start ))
-            printf "${GREEN}Rebuild finished in %02dh %02dm %02ds${NC}\n" $((retry_duration/3600)) $(((retry_duration%3600)/60)) $((retry_duration%60))
-            show_output_location
-        } || echo -e "${RED}Build still failed after retry.${NC}"
-        break
-    done
+    echo -e "Building firmware with $(nproc) cores..."
+    local start_time=$(date +%s)
+    if make -j"$(nproc)"; then
+        local duration=$(( $(date +%s) - start_time ))
+        printf "${GREEN}Build completed in %02dh %02dm %02ds${NC}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
+        echo -e "Output: $(pwd)/bin/targets/"
+    else
+        echo -e "${RED}Build failed.${NC}"
+    fi
 }
 
 cleanup() {
-    echo -e "${YELLOW}${BOLD}Cleaning up build script and preset files...${NC}"
+    echo -e "${YELLOW}Cleaning up...${NC}"
     rm -f "$script_file"
     rm -rf "$preset_folder"
 }
@@ -218,12 +185,12 @@ rebuild_menu() {
 check_git
 main_menu
 
-echo -e "${CYAN}Installing build dependencies...${NC}"
+echo -e "${CYAN}Installing dependencies...${NC}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 
 if [ -d "$distro/.git" ]; then
-    echo -e "${BLUE}Directory '$distro' already exists.${NC}"
+    echo -e "${BLUE}Found existing '$distro' directory.${NC}"
     rebuild_menu
 else
     build_menu

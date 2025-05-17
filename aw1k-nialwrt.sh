@@ -78,14 +78,17 @@ select_target() {
 }
 
 ensure_preset() {
-    if [[ ! -d "$distro/$preset_folder" ]]; then
-        echo -e "${YELLOW}${BOLD}NOTICE:${NC} Preset folder '$preset_folder' is missing. Re-downloading..."
-        git clone "$preset_repo" "$distro/$preset_folder" || {
-            echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
-            exit 1
-        }
-        echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully downloaded."
+    local preset_path="$distro/$preset_folder"
+    if [[ -d "$preset_path" ]]; then
+        echo -e "${YELLOW}${BOLD}NOTICE:${NC} Removing old preset folder..."
+        rm -rf "$preset_path"
     fi
+    echo -e "${CYAN}${BOLD}STEP:${NC} Cloning preset from $preset_repo..."
+    git clone "$preset_repo" "$preset_path" || {
+        echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
+        exit 1
+    }
+    echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully cloned."
 }
 
 run_menuconfig() {

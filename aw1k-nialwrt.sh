@@ -2,7 +2,6 @@
 
 script_path="$(realpath "$0")"
 
-# Reset & style
 RESET='\033[0m'
 BOLD='\033[1m'
 BLACK='\033[30m'
@@ -22,6 +21,7 @@ BOLD_BLUE="${BOLD}${BLUE}"
 BOLD_MAGENTA="${BOLD}${MAGENTA}"
 BOLD_CYAN="${BOLD}${CYAN}"
 BOLD_WHITE="${BOLD}${WHITE}"
+NC="${RESET}"
 
 # Distro & preset
 distro="immortalwrt"
@@ -48,7 +48,8 @@ opt=""
 
 prompt() {
     echo -ne "$1"
-    read -r "$2"
+    read -r input
+    eval "$2=\$input"
 }
 
 check_git() {
@@ -62,8 +63,8 @@ main_menu() {
     clear
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt            ${RESET}"
-    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                    ${RESET}"
+    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt           ${RESET}"
+    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_BLUE}BUILD MENU:${RESET}"
 }
@@ -71,11 +72,11 @@ main_menu() {
 update_feeds() {
     echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}";
+    echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}"
     read
     echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-     echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"
+    echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"
 }
 
 select_target() {
@@ -117,20 +118,33 @@ run_menuconfig() {
 }
 
 start_build() {
-    echo -e "${BOLD_YELLOW}BUILDING WITH $(nproc) CORES...${RESET}"
-    local start=$(date +%s)
-    if make -j"$(nproc)"; then
-        local dur=$(( $(date +%s) - start ))
-        printf "${BOLD_GREEN}BUILD COMPLETED IN %02dh %02dm %02ds${RESET}\n" $((dur / 3600)) $(((dur % 3600) / 60)) $((dur % 60))
-        echo -e "${BOLD_BLUE}OUTPUT: $(pwd)/bin/targets/${RESET}"
-    else
-        echo -e "${BOLD_RED}BUILD FAILED.${RESET}"
-    fi
+    while true; do
+        echo -e "${BOLD_YELLOW}BUILDING WITH $(nproc) CORES...${RESET}"
+        local start=$(date +%s)
+
+        if make -j"$(nproc)"; then
+            local dur=$(( $(date +%s) - start ))
+            printf "${BOLD_GREEN}BUILD COMPLETED IN %02dh %02dm %02ds${RESET}\n" \
+                $((dur / 3600)) $(((dur % 3600) / 60)) $((dur % 60))
+            echo -e "${BOLD_BLUE}OUTPUT: $(pwd)/bin/targets/${RESET}"
+            break
+        else
+            echo -e "${BOLD_RED}BUILD FAILED: DEBUGGING WITH VERBOSE OUTPUT${RESET}"
+            make -j1 V=s
+
+            echo -ne "${BOLD_RED}PLEASE FIX ERROR AND PRESS ENTER TO RETRY${RESET}"
+            read -r
+            make distclean
+            update_feeds || return 1
+            select_target
+            run_menuconfig
+        fi
+    done
 }
 
 cleanup() {
     echo -e "${BOLD_YELLOW}CLEANING UP...${RESET}"
-    rm -rf "$preset_folder"
+    rm -- "$script_path"
 }
 
 build_menu() {
@@ -139,7 +153,6 @@ build_menu() {
         echo -e "${BOLD_RED}GIT CLONE FAILED.${RESET}"
         exit 1
     }
-
     cd "$distro" || exit 1
     update_feeds || exit 1
     select_target
@@ -158,8 +171,8 @@ rebuild_menu() {
     clear
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt            ${RESET}"
-    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                    ${RESET}"
+    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt           ${RESET}"
+    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_BLUE}REBUILD MENU:${RESET}"
     echo -e "1)FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
@@ -201,16 +214,17 @@ rebuild_menu() {
     done
 }
 
-# Start process
 check_git
 main_menu
 
-echo -e "${BOLD_YELLOW}INSTALLING DEPENDENCIES...${RESET}"
+echo -e "${BOLD_YELLOW}INSTALLING DEPENDENCIES FOR $distro...${RESET}"
 sudo apt update -y && sudo apt full-upgrade -y
-sudo apt install -y "${deps[@]}"
+sudo apt install -y "${deps[@]}" || {
+    echo -e "${BOLD_RED}FAILED TO INSTALL DEPENDENCIES. PLEASE CHECK YOUR SYSTEM AND TRY AGAIN.${RESET}"
+    exit 1
+}
 
-if [ -d "$distro/.git" ]; then
-    echo -e "${BOLD_BLUE}FOUND EXISTING '$distro' DIRECTORY.${RESET}"
+if [ -d "$distro" ]; then
     rebuild_menu
 else
     build_menu

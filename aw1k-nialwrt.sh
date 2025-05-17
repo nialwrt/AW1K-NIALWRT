@@ -62,17 +62,22 @@ update_feeds() {
 
 select_target() {
     echo -e "${CYAN}${BOLD}STEP:${NC} Selecting target branch/tag..."
+    git fetch --all --tags
+
     echo -e "${YELLOW}Branches:${NC}"
-    git branch -a
+    git branch -r | sed 's|origin/||' | grep -v 'HEAD' | sort -u
+    
     echo -e "${YELLOW}Tags:${NC}"
     git tag | sort -V
+
     while true; do
-        prompt "${BLUE}Enter branch/tag to checkout: ${NC}" target_tag
-        git checkout "$target_tag" && {
+        prompt "${BLUE}Enter branch or tag to checkout: ${NC}" target_tag
+        if git checkout "$target_tag" 2>/dev/null; then
             echo -e "${GREEN}${BOLD}Checked out to: $target_tag${NC}"
             break
-        }
-        echo -e "${RED}${BOLD}Invalid branch/tag.${NC}"
+        else
+            echo -e "${RED}${BOLD}Invalid branch or tag: $target_tag${NC}"
+        fi
     done
 }
 

@@ -14,7 +14,6 @@ MAGENTA='\033[35m'
 CYAN='\033[36m'
 WHITE='\033[37m'
 
-# Gabungkan style dan warna jika perlu
 BOLD_BLACK="${BOLD}${BLACK}"
 BOLD_RED="${BOLD}${RED}"
 BOLD_GREEN="${BOLD}${GREEN}"

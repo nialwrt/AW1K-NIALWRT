@@ -166,7 +166,7 @@ rebuild_menu() {
     echo -e "2)FIRMWARE UPDATE (FAST REBUILD)"
     echo -e "3)EXISTING UPDATE (NO CHANGES)"
     while true; do
-        prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
+        prompt "${BOLD_BLUE}CHOOSE OPTION: ${RESET}" opt
         case "$opt" in
         1)
             make distclean

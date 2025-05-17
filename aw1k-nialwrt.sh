@@ -41,11 +41,6 @@ deps=(
     squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
 )
 
-# Placeholder
-choice=""
-target_tag=""
-opt=""
-
 prompt() {
     echo -ne "$1"
     read -r input

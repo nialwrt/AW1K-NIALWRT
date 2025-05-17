@@ -1,6 +1,6 @@
 #!/bin/bash
 
-script_file="$(basename "$0")"
+script_path="$(realpath "$0")"
 
 # Color codes
 BLUE='\033[0;34m'
@@ -119,7 +119,7 @@ start_build() {
 
 cleanup() {
     echo -e "${YELLOW}Cleaning up...${NC}"
-    rm -f "$script_file"
+    rm -f "$script_path"
     rm -rf "$preset_folder"
 }
 

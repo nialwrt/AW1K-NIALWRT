@@ -164,14 +164,14 @@ rebuild_menu() {
     echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
     echo -e "${BOLD_CYAN}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
     echo -e "${BOLD_CYAN}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
-    echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)"
+    echo -e "${BOLD_CYAN}3)${RESET} EXISTING UPDATE (NO CHANGES)"
     echo ""
 
     while true; do
         prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
         case "$opt" in
         1)
-            echo -e "${BOLD_YELLOW}FULL REBUILD SELECTED.${RESET}"
+            echo -e "${BOLD_YELLOW}FIRMWARE & PACKAGE SELECTED.${RESET}"
             make distclean
             update_feeds || exit 1
             select_target
@@ -184,7 +184,7 @@ rebuild_menu() {
             break
             ;;
         2)
-            echo -e "${BOLD_YELLOW}FAST REBUILD SELECTED.${RESET}"
+            echo -e "${BOLD_YELLOW}FIRMWARE UPDATE SELECTED.${RESET}"
             select_target
             ensure_preset
             apply_preset
@@ -195,7 +195,7 @@ rebuild_menu() {
             break
             ;;
         3)
-            echo -e "${BOLD_YELLOW}EXISTING CONFIG BUILD SELECTED.${RESET}"
+            echo -e "${BOLD_YELLOW}EXISTING UPDATE SELECTED.${RESET}"
             start_build
             cleanup
             break

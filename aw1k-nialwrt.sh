@@ -163,10 +163,10 @@ rebuild_menu() {
     echo -e "${BOLD_MAGENTA}  HTTPS://GITHUB.COM/NIALWRT          ${RESET}"
     echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                  ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-    echo -e "${BOLD}${MAGENTA}REBUILD OPTIONS:${RESET}"
-    echo -e "${BOLD}${MAGENTA}"1) FIRMWARE & PACKAGE UPDATE${RESET}"
-    echo -e "${BOLD}${MAGENTA}"2) FIRMWARE UPDATE${RESET}"
-    echo -e "${BOLD}${MAGENTA}"3) EXISTING UPDATE${RESET}"
+    echo -e "${BOLD_MAGENTA}REBUILD OPTIONS:${RESET}"
+    echo -e "${BOLD_MAGENTA}1) FIRMWARE & PACKAGE UPDATE${RESET}"
+    echo -e "${BOLD_MAGENTA}2) FIRMWARE UPDATE${RESET}"
+    echo -e "${BOLD_MAGENTA}3) EXISTING UPDATE${RESET}"
 
     while true; do
         prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt

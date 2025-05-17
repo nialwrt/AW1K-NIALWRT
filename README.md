@@ -1,4 +1,4 @@
-![Screenshot from 2025-05-10 18-09-18](https://github.com/user-attachments/assets/815a731d-5891-4cbb-a056-ccac53c3d85b)
+![Screenshot from 2025-05-17 08-31-59](https://github.com/user-attachments/assets/669a7dd4-e876-4662-9e51-99c7bc2a08f0)
 [![Status](https://img.shields.io/badge/Status-Stable-green.svg)](https://github.com/nialwrt/AW1K-NIALWRT)
 [![License](https://img.shields.io/badge/License-GPLv2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 [![Maintenance](https://img.shields.io/badge/Maintained-Yes-brightgreen.svg)](https://github.com/nialwrt/AW1K-NIALWRT)

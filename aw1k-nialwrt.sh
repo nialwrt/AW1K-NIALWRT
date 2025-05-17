@@ -2,7 +2,6 @@
 
 script_path="$(realpath "$0")"
 
-# Warna dan gaya teks
 RESET='\033[0m'
 BOLD='\033[1m'
 
@@ -58,9 +57,9 @@ check_git() {
 main_menu() {
     clear
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-    echo -e "${BOLD_MAGENTA}  HTTPS://GITHUB.COM/NIALWRT           ${RESET}"
-    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
+    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
+    echo -e "${BOLD_MAGENTA}  HTTPS://GITHUB.COM/NIALWRT          ${RESET}"
+    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                  ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
 }
 

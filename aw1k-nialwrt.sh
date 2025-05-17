@@ -143,14 +143,11 @@ start_build() {
 
 build_menu() {
     echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Starting first-time build...${NC}"
-    git clone "$preset_repo" "$distro/$preset_folder"
+    git clone "$repo" "$distro" || {
         echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Git clone failed.${NC}"
-        exit 1;
+        exit 1
     }
-    git clone "$preset_repo" "$preset_folder" || {
-        echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Git clone preset failed.${NC}"
-        exit 1;
-    }
+
     pushd "$distro" > /dev/null || exit 1
     update_feeds || exit 1
     select_target

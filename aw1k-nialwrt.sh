@@ -46,7 +46,7 @@ check_git() {
 main_menu() {
     clear
     echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
-    echo -e "${MAGENTA}${BOLD}  UNIVERSAL-NIALWRT Firmware Build  ${NC}"
+    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT Firmware Build  ${NC}"
     echo -e "${MAGENTA}  https://github.com/nialwrt          ${NC}"
     echo -e "${MAGENTA}  Telegram: @NIALVPN                  ${NC}"
     echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"

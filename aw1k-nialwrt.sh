@@ -29,7 +29,10 @@ squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd
 # Placeholder
 choice="" target_tag="" opt=""
 
-prompt() { read -rp "$1" "$2"; }
+prompt() {
+  echo -ne "$1"
+  read -r "$2"
+}
 
 check_git() {
   command -v git &>/dev/null || {

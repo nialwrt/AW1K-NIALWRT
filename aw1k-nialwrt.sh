@@ -194,6 +194,7 @@ rebuild_menu() {
             break
             ;;
         2)
+            make clean
             select_target
             ensure_preset
             apply_preset
@@ -203,7 +204,8 @@ rebuild_menu() {
             cleanup
             break
             ;;
-        3)
+        3) 
+            make clean
             start_build
             cleanup
             break

@@ -26,7 +26,10 @@ deps=( ack antlr3 asciidoc autoconf automake autopoint binutils bison build-esse
 # Placeholder variables
 choice="" target_tag="" opt=""
 
-prompt() { read -rp "$1" "$2"; }
+prompt() {
+  echo -ne "$1"
+  read -r "$2"
+}
 
 check_git() {
   command -v git &>/dev/null || {

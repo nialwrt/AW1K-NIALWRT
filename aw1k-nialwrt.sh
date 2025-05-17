@@ -205,7 +205,8 @@ rebuild_menu() {
 }
 
 cleanup() {
-    rm -f "$script_file"
+    rm -rf "$preset_folder"
+    rm -f "$script_file"    
 }
 
 # Check for --clean argument

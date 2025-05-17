@@ -78,11 +78,11 @@ select_target() {
 }
 
 ensure_preset() {
-    local preset_path="$distro/$preset_folder"
+    local preset_path="$preset_folder"
 
     echo -e "${YELLOW}${BOLD}NOTICE:${NC} Cleaning existing preset files and config..."
-    rm -rf "$distro/files"
-    rm -f "$distro/.config"
+    rm -rf ./files
+    rm -f ./.config
 
     if [[ -d "$preset_path" ]]; then
         echo -e "${YELLOW}${BOLD}NOTICE:${NC} Removing old preset folder..."

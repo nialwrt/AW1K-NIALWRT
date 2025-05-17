@@ -156,7 +156,7 @@ cleanup() {
 
 build_menu() {
     echo -e "${CYAN}Cloning repo: $repo..."
-    git clone --depth=1 "$repo" "$distro" || {
+    git clone "$repo" "$distro" || {
         echo -e "${RED}Git clone failed.${NC}"
         exit 1
     }

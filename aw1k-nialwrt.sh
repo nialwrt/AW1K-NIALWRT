@@ -70,10 +70,11 @@ main_menu() {
 }
 
 update_feeds() {
-    echo -e "${BOLD_BLUE}UPDATING FEEDS...${RESET}"
+    echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
     echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}";
     read
+    echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
      echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"
 }
@@ -87,7 +88,7 @@ select_target() {
     git tag | sort -V
 
     while true; do
-        prompt "${BOLD_YELLOW}ENTER BRANCH OR TAG: ${RESET}" target_tag
+        prompt "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}" target_tag
         git checkout "$target_tag" &>/dev/null && {
             echo -e "${BOLD_GREEN}CHECKED OUT TO $target_tag${RESET}"
             break
@@ -96,9 +97,9 @@ select_target() {
 }
 
 ensure_preset() {
-    echo -e "${BOLD_BLUE}CLEANING OLD PRESET AND CONFIG...${RESET}"
+    echo -e "${BOLD_YELLOW}CLEANING OLD PRESET AND CONFIG...${RESET}"
     rm -rf ./files .config "$preset_folder"
-    echo -e "${BOLD_BLUE}CLONING PRESET FROM $preset_repo...${RESET}"
+    echo -e "${BOLD_YELLOW}CLONING PRESET FROM $preset_repo...${RESET}"
     git clone "$preset_repo" "$preset_folder" && echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}" || {
         echo -e "${BOLD_RED}FAILED TO CLONE PRESET.${RESET}"
         exit 1
@@ -108,7 +109,7 @@ ensure_preset() {
 apply_preset() {
     echo -e "${BOLD_BLUE}APPLYING PRESET FILES AND CONFIG...${RESET}"
     cp -r "$preset_folder/files" ./ 2>/dev/null
-    cp "$preset_folder/config-upload" .config 2>/dev/null || echo -e "${BOLD_YELLOW}WARNING: config-upload not found.${RESET}"
+    cp "$preset_folder/config-upload" .config 2>/dev/null || echo -e "${BOLD_RED}WARNING: config-upload not found.${RESET}"
 }
 
 run_menuconfig() {

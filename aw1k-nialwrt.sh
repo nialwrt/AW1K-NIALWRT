@@ -4,12 +4,8 @@ script_path="$(realpath "$0")"
 
 # Reset & style
 RESET='\033[0m' BOLD='\033[1m'
-
-# Normal colors
 BLACK='\033[0;30m'; RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
 BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'; WHITE='\033[0;37m'
-
-# Bold colors
 BOLD_BLACK="${BOLD}${BLACK}"; BOLD_RED="${BOLD}${RED}"; BOLD_GREEN="${BOLD}${GREEN}"
 BOLD_YELLOW="${BOLD}${YELLOW}"; BOLD_BLUE="${BOLD}${BLUE}"; BOLD_MAGENTA="${BOLD}${MAGENTA}"
 BOLD_CYAN="${BOLD}${CYAN}"; BOLD_WHITE="${BOLD}${WHITE}"
@@ -21,9 +17,16 @@ preset_folder="AW1K-NIALWRT"
 preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 
 # Build dependencies
-deps=( ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext gcc-multilib g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1 libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses-dev libpython3-dev libreadline-dev libssl-dev libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd )
+deps=( ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
+bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext
+gcc-multilib g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1
+libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev
+libncurses-dev libpython3-dev libreadline-dev libssl-dev libtool libyaml-dev libz-dev
+lld llvm lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3
+python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils re2c rsync scons
+squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd )
 
-# Placeholder variables
+# Placeholder
 choice="" target_tag="" opt=""
 
 prompt() { read -rp "$1" "$2"; }
@@ -87,11 +90,7 @@ apply_preset() {
 
 run_menuconfig() {
   echo -e "${BOLD_BLUE}RUNNING MENUCONFIG...${RESET}"
-  if make menuconfig; then
-    echo -e "${BOLD_GREEN}CONFIGURATION SAVED.${RESET}"
-  else
-    echo -e "${BOLD_RED}MENUCONFIG FAILED.${RESET}"
-  fi
+  make menuconfig && echo -e "${BOLD_GREEN}CONFIGURATION SAVED.${RESET}" || echo -e "${BOLD_RED}MENUCONFIG FAILED.${RESET}"
 }
 
 start_build() {
@@ -185,6 +184,7 @@ rebuild_menu() {
   done
 }
 
+# Start process
 check_git
 main_menu
 

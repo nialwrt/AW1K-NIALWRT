@@ -107,18 +107,18 @@ ensure_preset() {
 }
 
 apply_preset() {
-    echo -e "${BOLD_BLUE}APPLYING PRESET FILES AND CONFIG...${RESET}"
+    echo -e "${BOLD_YELLOW}APPLYING PRESET FILES AND CONFIG...${RESET}"
     cp -r "$preset_folder/files" ./ 2>/dev/null
     cp "$preset_folder/config-upload" .config 2>/dev/null || echo -e "${BOLD_RED}WARNING: config-upload not found.${RESET}"
 }
 
 run_menuconfig() {
-    echo -e "${BOLD_BLUE}RUNNING MENUCONFIG...${RESET}"
+    echo -e "${BOLD_YELLOW}RUNNING MENUCONFIG...${RESET}"
     make menuconfig && echo -e "${BOLD_GREEN}CONFIGURATION SAVED.${RESET}" || echo -e "${BOLD_RED}MENUCONFIG FAILED.${RESET}"
 }
 
 start_build() {
-    echo -e "${BOLD_BLUE}BUILDING WITH $(nproc) CORES...${RESET}"
+    echo -e "${BOLD_YELLOW}BUILDING WITH $(nproc) CORES...${RESET}"
     local start=$(date +%s)
     if make -j"$(nproc)"; then
         local dur=$(( $(date +%s) - start ))

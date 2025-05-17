@@ -39,7 +39,7 @@ main_menu() {
   clear
   echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
   echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
-  echo -e "${BOLD_MAGENTA}  HTTPS://GITHUB.COM/NIALWRT          ${RESET}"
+  echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt          ${RESET}"
   echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                  ${RESET}"
   echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
 }

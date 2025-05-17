@@ -26,7 +26,7 @@ lld llvm lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf pyt
 python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils re2c rsync scons
 squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd )
 
-# Variables
+# Vars
 choice="" target_tag="" opt=""
 
 prompt() {
@@ -44,9 +44,9 @@ check_git() {
 main_menu() {
   clear
   echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-  echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-  echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt            ${RESET}"
-  echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                    ${RESET}"
+  echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
+  echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt          ${RESET}"
+  echo -e "${BOLD_MAGENTA}  Telegram: @NIALVPN                  ${RESET}"
   echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
 }
 
@@ -133,15 +133,16 @@ rebuild_menu() {
   clear
   cd "$distro" || exit 1
   echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-  echo -e "${BOLD_MAGENTA}          AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
-  echo -e "${BOLD_MAGENTA}          https://github.com/nialwrt          ${RESET}"
-  echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                  ${RESET}"
-  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}\n"
+  echo -e "${BOLD_MAGENTA}        AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
+  echo -e "${BOLD_MAGENTA}        https://github.com/nialwrt          ${RESET}"
+  echo -e "${BOLD_MAGENTA}        Telegram: @NIALVPN                  ${RESET}"
+  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
+  echo ""
   echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
   echo -e "${BOLD_CYAN}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
   echo -e "${BOLD_CYAN}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
-  echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)\n"
-
+  echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)"
+  echo ""
   while true; do
     prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
     case "$opt" in
@@ -184,7 +185,6 @@ rebuild_menu() {
 # Start process
 check_git
 main_menu
-
 echo -e "${BOLD_BLUE}INSTALLING DEPENDENCIES...${RESET}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"

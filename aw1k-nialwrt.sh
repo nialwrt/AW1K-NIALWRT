@@ -2,10 +2,10 @@
 
 script_path="$(realpath "$0")"
 
-# Reset & style (alternatif)
-RESET='\e[0m' BOLD='\e[1m'
-BLACK='\e[30m'; RED='\e[31m'; GREEN='\e[32m'; YELLOW='\e[33m'
-BLUE='\e[34m'; MAGENTA='\e[35m'; CYAN='\e[36m'; WHITE='\e[37m'
+# Reset & style (standard ANSI)
+RESET='\033[0m' BOLD='\033[1m'
+BLACK='\033[0;30m'; RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
+BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'; WHITE='\033[0;37m'
 BOLD_BLACK="${BOLD}${BLACK}"; BOLD_RED="${BOLD}${RED}"; BOLD_GREEN="${BOLD}${GREEN}"
 BOLD_YELLOW="${BOLD}${YELLOW}"; BOLD_BLUE="${BOLD}${BLUE}"; BOLD_MAGENTA="${BOLD}${MAGENTA}"
 BOLD_CYAN="${BOLD}${CYAN}"; BOLD_WHITE="${BOLD}${WHITE}"
@@ -26,7 +26,7 @@ lld llvm lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf pyt
 python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils re2c rsync scons
 squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd )
 
-# Placeholder
+# Variables
 choice="" target_tag="" opt=""
 
 prompt() {
@@ -65,7 +65,6 @@ select_target() {
   git branch -r | sed 's|origin/||' | grep -v 'HEAD' | sort -u
   echo -e "${BOLD_BLUE}TAGS:${RESET}"
   git tag | sort -V
-
   while true; do
     prompt "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}" target_tag
     git checkout "$target_tag" &>/dev/null && {
@@ -119,7 +118,6 @@ build_menu() {
     echo -e "${BOLD_RED}GIT CLONE FAILED.${RESET}"
     exit 1
   }
-
   cd "$distro" || exit 1
   update_feeds || exit 1
   select_target
@@ -134,19 +132,15 @@ build_menu() {
 rebuild_menu() {
   clear
   cd "$distro" || exit 1
-
   echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-  echo -e "${BOLD_MAGENTA}          AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-  echo -e "${BOLD_MAGENTA}          https://github.com/nialwrt            ${RESET}"
-  echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                    ${RESET}"
-  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-  echo ""
-
+  echo -e "${BOLD_MAGENTA}          AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
+  echo -e "${BOLD_MAGENTA}          https://github.com/nialwrt          ${RESET}"
+  echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                  ${RESET}"
+  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}\n"
   echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
   echo -e "${BOLD_CYAN}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
   echo -e "${BOLD_CYAN}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
-  echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)"
-  echo ""
+  echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)\n"
 
   while true; do
     prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt

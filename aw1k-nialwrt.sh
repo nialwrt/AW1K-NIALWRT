@@ -160,9 +160,9 @@ rebuild_menu() {
     echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                    ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
     echo -e "${BOLD_BLUE}REBUILD MENU:${RESET}"
-    echo -e "${BOLD_BLUE}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
-    echo -e "${BOLD_BLUE}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
-    echo -e "${BOLD_BLUE}3)${RESET} EXISTING UPDATE (NO CHANGES)"
+    echo -e "1)FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
+    echo -e "2)FIRMWARE UPDATE (FAST REBUILD)"
+    echo -e "3)EXISTING UPDATE (NO CHANGES)"
     while true; do
         prompt "${BOLD_YELLOW}CHOOSE OPTION [1/2/3]: ${RESET}" opt
         case "$opt" in

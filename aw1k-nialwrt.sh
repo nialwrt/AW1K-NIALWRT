@@ -86,7 +86,7 @@ select_target() {
     git tag | sort -V
 
     while true; do
-        prompt "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}" target_tag
+        prompt "${BOLD_YELLOW}ENTER BRANCH OR TAG: ${RESET}" target_tag
         git checkout "$target_tag" &>/dev/null && {
             echo -e "${BOLD_GREEN}CHECKED OUT TO $target_tag${RESET}"
             break
@@ -105,7 +105,7 @@ ensure_preset() {
 }
 
 apply_preset() {
-    echo -e "${BOLD_YELLOW}APPLYING PRESET FILES AND CONFIG...${RESET}"
+    echo -e "${BOLD_BLUE}APPLYING PRESET FILES AND CONFIG...${RESET}"
     cp -r "$preset_folder/files" ./ 2>/dev/null
     cp "$preset_folder/config-upload" .config 2>/dev/null || echo -e "${BOLD_YELLOW}WARNING: config-upload not found.${RESET}"
 }

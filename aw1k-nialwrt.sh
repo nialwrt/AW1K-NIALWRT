@@ -2,31 +2,33 @@
 
 script_path="$(realpath "$0")"
 
-# Reset & style (standard ANSI)
+# ANSI color codes (for Ubuntu-safe output)
 RESET='\033[0m' BOLD='\033[1m'
 BLACK='\033[0;30m'; RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
 BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'; WHITE='\033[0;37m'
-BOLD_BLACK="${BOLD}${BLACK}"; BOLD_RED="${BOLD}${RED}"; BOLD_GREEN="${BOLD}${GREEN}"
-BOLD_YELLOW="${BOLD}${YELLOW}"; BOLD_BLUE="${BOLD}${BLUE}"; BOLD_MAGENTA="${BOLD}${MAGENTA}"
-BOLD_CYAN="${BOLD}${CYAN}"; BOLD_WHITE="${BOLD}${WHITE}"
+BOLD_RED="${BOLD}${RED}"; BOLD_GREEN="${BOLD}${GREEN}"; BOLD_YELLOW="${BOLD}${YELLOW}"
+BOLD_BLUE="${BOLD}${BLUE}"; BOLD_MAGENTA="${BOLD}${MAGENTA}"; BOLD_CYAN="${BOLD}${CYAN}"
 
-# Distro & preset
+# Distro & preset info
 distro="immortalwrt"
 repo="https://github.com/immortalwrt/immortalwrt.git"
 preset_folder="AW1K-NIALWRT"
 preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 
-# Build dependencies
-deps=( ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
-bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext
-gcc-multilib g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1
-libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev
-libncurses-dev libpython3-dev libreadline-dev libssl-dev libtool libyaml-dev libz-dev
-lld llvm lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python3
-python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils re2c rsync scons
-squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd )
+# Full build dependencies for OpenWrt/ImmortalWrt
+deps=(
+  ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
+  bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk
+  gettext gcc-multilib g++-multilib git gnutls-dev gperf haveged help2man intltool
+  lib32gcc-s1 libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev
+  libmpc-dev libmpfr-dev libncurses-dev libpython3-dev libreadline-dev libssl-dev
+  libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano ninja-build
+  p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils
+  python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig
+  texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
+)
 
-# Vars
+# Global vars
 choice="" target_tag="" opt=""
 
 prompt() {
@@ -53,7 +55,8 @@ main_menu() {
 update_feeds() {
   echo -e "${BOLD_BLUE}UPDATING FEEDS...${RESET}"
   ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-  read -rp "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}"
+  echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}"
+  read -r
   ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
   echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"
 }
@@ -66,11 +69,12 @@ select_target() {
   echo -e "${BOLD_BLUE}TAGS:${RESET}"
   git tag | sort -V
   while true; do
-    prompt "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}" target_tag
+    echo -ne "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}"
+    read -r target_tag
     git checkout "$target_tag" &>/dev/null && {
       echo -e "${BOLD_GREEN}CHECKED OUT TO $target_tag${RESET}"
       break
-    } || echo -e "${BOLD_RED}INVALID BRANCH/TAG: $target_tag${RESET}"
+    } || echo -e "${BOLD_RED}INVALID BRANCH/TAG.${RESET}"
   done
 }
 
@@ -78,10 +82,11 @@ ensure_preset() {
   echo -e "${BOLD_YELLOW}CLEANING OLD PRESET AND CONFIG...${RESET}"
   rm -rf ./files .config "$preset_folder"
   echo -e "${BOLD_BLUE}CLONING PRESET FROM $preset_repo...${RESET}"
-  git clone "$preset_repo" "$preset_folder" && echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}" || {
+  git clone "$preset_repo" "$preset_folder" || {
     echo -e "${BOLD_RED}FAILED TO CLONE PRESET.${RESET}"
     exit 1
   }
+  echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}"
 }
 
 apply_preset() {
@@ -136,15 +141,15 @@ rebuild_menu() {
   echo -e "${BOLD_MAGENTA}        AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
   echo -e "${BOLD_MAGENTA}        https://github.com/nialwrt          ${RESET}"
   echo -e "${BOLD_MAGENTA}        Telegram: @NIALVPN                  ${RESET}"
-  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-  echo ""
+  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}\n"
   echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
-  echo -e "${BOLD_CYAN}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
-  echo -e "${BOLD_CYAN}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
-  echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)"
-  echo ""
+  echo -e "${BOLD_CYAN}1)${RESET} FULL REBUILD (DISTCLEAN + CONFIG)"
+  echo -e "${BOLD_CYAN}2)${RESET} FAST REBUILD (CONFIG ONLY)"
+  echo -e "${BOLD_CYAN}3)${RESET} BUILD WITH EXISTING CONFIG\n"
+
   while true; do
-    prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
+    echo -ne "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}"
+    read -r opt
     case "$opt" in
       1)
         echo -e "${BOLD_YELLOW}FULL REBUILD SELECTED.${RESET}"
@@ -157,8 +162,7 @@ rebuild_menu() {
         run_menuconfig
         start_build
         cleanup
-        break
-        ;;
+        break ;;
       2)
         echo -e "${BOLD_YELLOW}FAST REBUILD SELECTED.${RESET}"
         select_target
@@ -168,29 +172,26 @@ rebuild_menu() {
         run_menuconfig
         start_build
         cleanup
-        break
-        ;;
+        break ;;
       3)
         echo -e "${BOLD_YELLOW}EXISTING CONFIG BUILD SELECTED.${RESET}"
         start_build
         cleanup
-        break
-        ;;
+        break ;;
       *)
-        echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1, 2, OR 3.${RESET}" ;;
+        echo -e "${BOLD_RED}INVALID CHOICE. ENTER 1, 2 OR 3.${RESET}" ;;
     esac
   done
 }
 
-# Start process
+# Run setup
 check_git
 main_menu
 echo -e "${BOLD_BLUE}INSTALLING DEPENDENCIES...${RESET}"
-sudo apt update -y && sudo apt full-upgrade -y
-sudo apt install -y "${deps[@]}"
+sudo apt update -y && sudo apt install -y "${deps[@]}"
 
 if [ -d "$distro/.git" ]; then
-  echo -e "${BOLD_BLUE}FOUND EXISTING '$distro' DIRECTORY.${RESET}"
+  echo -e "${BOLD_BLUE}FOUND EXISTING '$distro'. CONTINUING...${RESET}"
   rebuild_menu
 else
   build_menu

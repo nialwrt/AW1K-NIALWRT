@@ -79,16 +79,29 @@ select_target() {
 
 ensure_preset() {
     local preset_path="$distro/$preset_folder"
+
+    echo -e "${YELLOW}${BOLD}NOTICE:${NC} Cleaning existing preset files and config..."
+    rm -rf "$distro/files"
+    rm -f "$distro/.config"
+
     if [[ -d "$preset_path" ]]; then
         echo -e "${YELLOW}${BOLD}NOTICE:${NC} Removing old preset folder..."
         rm -rf "$preset_path"
     fi
+
     echo -e "${CYAN}${BOLD}STEP:${NC} Cloning preset from $preset_repo..."
     git clone "$preset_repo" "$preset_path" || {
         echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
         exit 1
     }
+
     echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully cloned."
+}
+
+apply_preset() {
+    echo -e "${CYAN}${BOLD}STEP:${NC} Copying preset files and configuration..."
+    cp -r "$preset_folder/files" ./
+    cp "$preset_folder/config-upload" .config
 }
 
 run_menuconfig() {
@@ -155,8 +168,7 @@ build_menu() {
     update_feeds || exit 1
     select_target
     ensure_preset
-    cp -r "$preset_folder/files" ./
-    cp "$preset_folder/config-upload" .config
+    apply_preset
     make defconfig
     run_menuconfig
     start_build
@@ -175,32 +187,25 @@ rebuild_menu() {
         prompt "${YELLOW}Select option [1/2/3]: ${NC}" opt
         case "$opt" in
             1)
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Performing fresh rebuild...${NC}"
+                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Fresh Rebuild...${NC}"
                 make distclean
                 update_feeds || return 1
                 select_target
                 ensure_preset
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Copying preset files and configuration...${NC}"
-                cp -r "$preset_folder/files" ./
-                cp "$preset_folder/config-upload" .config
+                apply_preset
                 make defconfig
                 run_menuconfig
                 start_build
                 break
                 ;;
             2)
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Configuring and rebuilding (new .config)...${NC}"
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}deleting preset files and configuration...${NC}"
-                rm -rf "./files"
-                rm -f ".config"
-                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}restore preset files and configuration...${NC}"
+                echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Configure and Rebuild...${NC}"
+                select_target
                 ensure_preset
-                cp -r "$preset_folder/files" ./
-                cp "$preset_folder/config-upload" .config
+                apply_preset
                 make defconfig
                 run_menuconfig
                 start_build
-
                 break
                 ;;
             3)
@@ -218,7 +223,6 @@ rebuild_menu() {
 }
 
 cleanup() {
-    rm -rf "$preset_folder"
     rm -f "$script_file"    
 }
 

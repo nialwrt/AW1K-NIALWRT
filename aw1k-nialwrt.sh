@@ -2,21 +2,33 @@
 
 script_path="$(realpath "$0")"
 
-# Color codes
-BLUE='\033[1;34m'
-GREEN='\033[1;32m'
-RED='\033[1;31m'
-YELLOW='\033[1;33m'
-CYAN='\033[1;36m'
-MAGENTA='\033[1;35m'
-NC='\033[0m'
+# Warna dan gaya teks
+RESET='\033[0m'
 BOLD='\033[1m'
+
+BLACK='\033[0;30m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[0;37m'
+
+BOLD_RED="${BOLD}${RED}"
+BOLD_GREEN="${BOLD}${GREEN}"
+BOLD_YELLOW="${BOLD}${YELLOW}"
+BOLD_BLUE="${BOLD}${BLUE}"
+BOLD_MAGENTA="${BOLD}${MAGENTA}"
+BOLD_CYAN="${BOLD}${CYAN}"
+BOLD_WHITE="${BOLD}${WHITE}"
 
 # Distro and preset configuration
 distro="immortalwrt"
 repo="https://github.com/immortalwrt/immortalwrt.git"
 preset_folder="AW1K-NIALWRT"
 preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
+
 deps=(ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
     bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext gcc-multilib
     g++-multilib git gnutls-dev gperf haveged help2man intltool lib32gcc-s1 libc6-dev-i386 libelf-dev
@@ -38,95 +50,98 @@ prompt() {
 
 check_git() {
     command -v git &>/dev/null || {
-        echo -e "${RED}${BOLD}ERROR:${NC} GIT IS REQUIRED."
+        echo -e "${BOLD_RED}ERROR:${RESET} Git is required."
         exit 1
     }
 }
 
 main_menu() {
     clear
-    echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
-    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT FIRMWARE BUILD  ${NC}"
-    echo -e "${MAGENTA}${BOLD}  HTTPS://GITHUB.COM/NIALWRT          ${NC}"
-    echo -e "${MAGENTA}${BOLD}  TELEGRAM: @NIALVPN                  ${NC}"
-    echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
+    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
+    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
+    echo -e "${BOLD_MAGENTA}  HTTPS://GITHUB.COM/NIALWRT           ${RESET}"
+    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
+    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
 }
 
 update_feeds() {
-    echo -e "${BLUE}${BOLD}UPDATING FEEDS...${NC}"
+    echo -e "${BOLD_BLUE}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -ne "${BLUE}${BOLD}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${NC}"
+    echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}"
     read
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -e "${GREEN}${BOLD}FEEDS UPDATED.${NC}"
+    echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"
 }
 
 select_target() {
-    echo -e "${BLUE}${BOLD}SELECT BRANCH OR TAG:${NC}"
+    echo -e "${BOLD_BLUE}SELECT BRANCH OR TAG:${RESET}"
     git fetch --all --tags
 
-    echo -e "${BLUE}${BOLD}BRANCHES:${NC}"
+    echo -e "${BOLD_BLUE}BRANCHES:${RESET}"
     git branch -r | sed 's|origin/||' | grep -v 'HEAD' | sort -u
 
-    echo -e "${BLUE}${BOLD}TAGS:${NC}"
+    echo -e "${BOLD_BLUE}TAGS:${RESET}"
     git tag | sort -V
 
     while true; do
-        prompt "${BLUE}${BOLD}ENTER BRANCH OR TAG: ${NC}" target_tag
+        prompt "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}" target_tag
         if git checkout "$target_tag" 2>/dev/null; then
-            echo -e "${GREEN}${BOLD}CHECKED OUT TO $target_tag${NC}"
+            echo -e "${BOLD_GREEN}CHECKED OUT TO $target_tag${RESET}"
             break
         else
-            echo -e "${RED}${BOLD}INVALID BRANCH/TAG: $target_tag${NC}"
+            echo -e "${BOLD_RED}INVALID BRANCH/TAG: $target_tag${RESET}"
         fi
     done
 }
 
 ensure_preset() {
-    echo -e "${YELLOW}${BOLD}CLEANING OLD PRESET AND CONFIG...${NC}"
+    echo -e "${BOLD_YELLOW}CLEANING OLD PRESET AND CONFIG...${RESET}"
     rm -rf ./files .config "$preset_folder"
-    echo -e "${BLUE}${BOLD}CLONING PRESET FROM $preset_repo...${NC}"
-    git clone "$preset_repo" "$preset_folder" || { echo -e "${RED}${BOLD}FAILED TO CLONE PRESET.${NC}"; exit 1; }
-    echo -e "${GREEN}${BOLD}PRESET CLONED.${NC}"
+    echo -e "${BOLD_BLUE}CLONING PRESET FROM $preset_repo...${RESET}"
+    git clone "$preset_repo" "$preset_folder" || {
+        echo -e "${BOLD_RED}FAILED TO CLONE PRESET.${RESET}"
+        exit 1
+    }
+    echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}"
 }
 
 apply_preset() {
-    echo -e "${BLUE}${BOLD}APPLYING PRESET FILES AND CONFIG...${NC}"
+    echo -e "${BOLD_BLUE}APPLYING PRESET FILES AND CONFIG...${RESET}"
     cp -r "$preset_folder/files" ./
     cp "$preset_folder/config-upload" .config
 }
 
 run_menuconfig() {
-    echo -e "${BLUE}${BOLD}RUNNING MENUCONFIG...${NC}"
+    echo -e "${BOLD_BLUE}RUNNING MENUCONFIG...${RESET}"
     if make menuconfig; then
-        echo -e "${GREEN}${BOLD}CONFIGURATION SAVED.${NC}"
+        echo -e "${BOLD_GREEN}CONFIGURATION SAVED.${RESET}"
     else
-        echo -e "${RED}${BOLD}MENUCONFIG FAILED.${NC}"
+        echo -e "${BOLD_RED}MENUCONFIG FAILED.${RESET}"
     fi
 }
 
 start_build() {
-    echo -e "${BLUE}${BOLD}BUILDING FIRMWARE WITH $(nproc) CORES...${NC}"
+    echo -e "${BOLD_BLUE}BUILDING FIRMWARE WITH $(nproc) CORES...${RESET}"
     local start_time=$(date +%s)
     if make -j"$(nproc)"; then
         local duration=$(( $(date +%s) - start_time ))
-        printf "${GREEN}${BOLD}BUILD COMPLETED IN %02dh %02dm %02ds${NC}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
-        echo -e "${BLUE}${BOLD}OUTPUT: $(pwd)/bin/targets/${NC}"
+        printf "${BOLD_GREEN}BUILD COMPLETED IN %02dh %02dm %02ds${RESET}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
+        echo -e "${BOLD_BLUE}OUTPUT: $(pwd)/bin/targets/${RESET}"
     else
-        echo -e "${RED}${BOLD}BUILD FAILED.${NC}"
+        echo -e "${BOLD_RED}BUILD FAILED.${RESET}"
     fi
 }
 
 cleanup() {
-    echo -e "${YELLOW}${BOLD}CLEANING UP...${NC}"
+    echo -e "${BOLD_YELLOW}CLEANING UP...${RESET}"
     rm -f "$script_path"
     rm -rf "$preset_folder"
 }
 
 build_menu() {
-    echo -e "${BLUE}${BOLD}CLONING REPO: $repo...${NC}"
+    echo -e "${BOLD_BLUE}CLONING REPO: $repo...${RESET}"
     git clone "$repo" "$distro" || {
-        echo -e "${RED}${BOLD}GIT CLONE FAILED.${NC}"
+        echo -e "${BOLD_RED}GIT CLONE FAILED.${RESET}"
         exit 1
     }
 
@@ -143,13 +158,13 @@ build_menu() {
 
 rebuild_menu() {
     cd "$distro" || exit 1
-    echo -e "${BLUE}${BOLD}REBUILD OPTIONS:${NC}"
-    echo "${BLUE}${BOLD}1) FIRMWARE & PACKAGE UPDATE${NC}"
-    echo "${BLUE}${BOLD}2) FIRMWARE UPDATE${NC}"
-    echo "${BLUE}${BOLD}3) EXISTING UPDATE${NC}"
+    echo -e "${BOLD_BLUE}REBUILD OPTIONS:${RESET}"
+    echo -e "${BOLD_BLUE}1) FIRMWARE & PACKAGE UPDATE${RESET}"
+    echo -e "${BOLD_BLUE}2) FIRMWARE UPDATE${RESET}"
+    echo -e "${BOLD_BLUE}3) EXISTING UPDATE${RESET}"
 
     while true; do
-        prompt "${BLUE}${BOLD}CHOOSE OPTION [1/2/3]: ${NC}" opt
+        prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
         case "$opt" in
             1)
                 make distclean
@@ -179,20 +194,21 @@ rebuild_menu() {
                 break
                 ;;
             *)
-                echo -e "${RED}${BOLD}INVALID CHOICE.${NC}" ;;
+                echo -e "${BOLD_RED}INVALID CHOICE.${RESET}" ;;
         esac
     done
 }
 
+# Permulaan
 check_git
 main_menu
 
-echo -e "${BLUE}${BOLD}INSTALLING DEPENDENCIES...${NC}"
+echo -e "${BOLD_BLUE}INSTALLING DEPENDENCIES...${RESET}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 
 if [ -d "$distro/.git" ]; then
-    echo -e "${BLUE}${BOLD}FOUND EXISTING '$distro' DIRECTORY.${NC}"
+    echo -e "${BOLD_BLUE}FOUND EXISTING '$distro' DIRECTORY.${RESET}"
     rebuild_menu
 else
     build_menu

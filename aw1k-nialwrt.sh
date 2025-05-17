@@ -46,14 +46,14 @@ check_git() {
 main_menu() {
     clear
     echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
-    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT FIRMWARE BUILD         ${NC}"
+    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT FIRMWARE BUILD  ${NC}"
     echo -e "${MAGENTA}${BOLD}  HTTPS://GITHUB.COM/NIALWRT          ${NC}"
     echo -e "${MAGENTA}${BOLD}  TELEGRAM: @NIALVPN                  ${NC}"
     echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
 }
 
 update_feeds() {
-    echo -e "${CYAN}${BOLD}UPDATING FEEDS...${NC}"
+    echo -e "${BLUE}${BOLD}UPDATING FEEDS...${NC}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
     echo -ne "${BLUE}${BOLD}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${NC}"
     read
@@ -62,7 +62,7 @@ update_feeds() {
 }
 
 select_target() {
-    echo -e "${CYAN}${BOLD}SELECT BRANCH OR TAG:${NC}"
+    echo -e "${BLUE}${BOLD}SELECT BRANCH OR TAG:${NC}"
     git fetch --all --tags
 
     echo -e "${BLUE}${BOLD}BRANCHES:${NC}"
@@ -124,7 +124,7 @@ cleanup() {
 }
 
 build_menu() {
-    echo -e "${CYAN}${BOLD}CLONING REPO: $repo...${NC}"
+    echo -e "${BLUE}${BOLD}CLONING REPO: $repo...${NC}"
     git clone "$repo" "$distro" || {
         echo -e "${RED}${BOLD}GIT CLONE FAILED.${NC}"
         exit 1
@@ -149,7 +149,7 @@ rebuild_menu() {
     echo "${BLUE}${BOLD}3) EXISTING UPDATE${NC}"
 
     while true; do
-        prompt "${YELLOW}${BOLD}CHOOSE OPTION [1/2/3]: ${NC}" opt
+        prompt "${BLUE}${BOLD}CHOOSE OPTION [1/2/3]: ${NC}" opt
         case "$opt" in
             1)
                 make distclean
@@ -187,7 +187,7 @@ rebuild_menu() {
 check_git
 main_menu
 
-echo -e "${CYAN}${BOLD}INSTALLING DEPENDENCIES...${NC}"
+echo -e "${BLUE}${BOLD}INSTALLING DEPENDENCIES...${NC}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 

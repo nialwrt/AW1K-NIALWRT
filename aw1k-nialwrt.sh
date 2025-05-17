@@ -77,6 +77,17 @@ select_target() {
     done
 }
 
+ensure_preset() {
+    if [[ ! -d "$preset_folder" ]]; then
+        echo -e "${YELLOW}${BOLD}NOTICE:${NC} Preset folder '$preset_folder' is missing. Re-downloading..."
+        git clone "$preset_repo" "$preset_folder" || {
+            echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
+            exit 1
+        }
+        echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully re-downloaded."
+    fi
+}
+
 run_menuconfig() {
     echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Running menuconfig...${NC}"
     make menuconfig && echo -e "${GREEN}${BOLD}SUCCESS:${NC} ${GREEN}${BOLD}Configuration saved.${NC}" || echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Configuration failed.${NC}"

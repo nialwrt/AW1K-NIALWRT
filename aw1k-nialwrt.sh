@@ -4,8 +4,8 @@ script_path="$(realpath "$0")"
 
 # Reset & style
 RESET='\033[0m' BOLD='\033[1m'
-BLACK='\033[0;30m'; RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
-BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'; WHITE='\033[0;37m'
+BLACK='\033[30m'; RED='\033[31m'; GREEN='\033[32m'; YELLOW='\033[33m'
+BLUE='\033[34m'; MAGENTA='\033[35m'; CYAN='\033[36m'; WHITE='\033[37m'
 BOLD_BLACK="${BOLD}${BLACK}"; BOLD_RED="${BOLD}${RED}"; BOLD_GREEN="${BOLD}${GREEN}"
 BOLD_YELLOW="${BOLD}${YELLOW}"; BOLD_BLUE="${BOLD}${BLUE}"; BOLD_MAGENTA="${BOLD}${MAGENTA}"
 BOLD_CYAN="${BOLD}${CYAN}"; BOLD_WHITE="${BOLD}${WHITE}"
@@ -44,9 +44,9 @@ check_git() {
 main_menu() {
   clear
   echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-  echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
-  echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt          ${RESET}"
-  echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                  ${RESET}"
+  echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
+  echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt            ${RESET}"
+  echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                    ${RESET}"
   echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
 }
 
@@ -136,9 +136,9 @@ rebuild_menu() {
   cd "$distro" || exit 1
 
   echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-  echo -e "${BOLD_MAGENTA}        AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
-  echo -e "${BOLD_MAGENTA}        https://github.com/nialwrt          ${RESET}"
-  echo -e "${BOLD_MAGENTA}        Telegram: @NIALVPN                  ${RESET}"
+  echo -e "${BOLD_MAGENTA}          AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
+  echo -e "${BOLD_MAGENTA}          https://github.com/nialwrt            ${RESET}"
+  echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                    ${RESET}"
   echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
   echo ""
 

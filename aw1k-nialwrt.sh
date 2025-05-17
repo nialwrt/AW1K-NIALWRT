@@ -78,13 +78,13 @@ select_target() {
 }
 
 ensure_preset() {
-    if [[ ! -d "$preset_folder" ]]; then
+    if [[ ! -d "$distro/$preset_folder" ]]; then
         echo -e "${YELLOW}${BOLD}NOTICE:${NC} Preset folder '$preset_folder' is missing. Re-downloading..."
-        git clone "$preset_repo" "$preset_folder" || {
+        git clone "$preset_repo" "$distro/$preset_folder" || {
             echo -e "${RED}${BOLD}ERROR:${NC} Failed to clone preset from $preset_repo"
             exit 1
         }
-        echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfull."
+        echo -e "${GREEN}${BOLD}SUCCESS:${NC} Preset successfully downloaded."
     fi
 }
 
@@ -143,7 +143,7 @@ start_build() {
 
 build_menu() {
     echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Starting first-time build...${NC}"
-    git clone "$repo" "$distro" || {
+    git clone "$preset_repo" "$distro/$preset_folder"
         echo -e "${RED}${BOLD}ERROR:${NC} ${RED}${BOLD}Git clone failed.${NC}"
         exit 1;
     }
@@ -155,8 +155,8 @@ build_menu() {
     update_feeds || exit 1
     select_target
     ensure_preset
-    cp -r "../$preset_folder/files" ./
-    cp "../$preset_folder/config-upload" .config
+    cp -r "$preset_folder/files" ./
+    cp "$preset_folder/config-upload" .config
     make defconfig
     run_menuconfig
     start_build
@@ -181,8 +181,8 @@ rebuild_menu() {
                 select_target
                 ensure_preset
                 echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}Copying preset files and configuration...${NC}"
-                cp -r "../$preset_folder/files" ./
-                cp "../$preset_folder/config-upload" .config
+                cp -r "$preset_folder/files" ./
+                cp "$preset_folder/config-upload" .config
                 make defconfig
                 run_menuconfig
                 start_build
@@ -195,8 +195,8 @@ rebuild_menu() {
                 rm -f ".config"
                 echo -e "${CYAN}${BOLD}STEP:${NC} ${CYAN}${BOLD}restore preset files and configuration...${NC}"
                 ensure_preset
-                cp -r "../$preset_folder/files" ./
-                cp "../$preset_folder/config-upload" .config
+                cp -r "$preset_folder/files" ./
+                cp "$preset_folder/config-upload" .config
                 make defconfig
                 run_menuconfig
                 start_build

@@ -23,13 +23,11 @@ BOLD_CYAN="${BOLD}${CYAN}"
 BOLD_WHITE="${BOLD}${WHITE}"
 NC="${RESET}"
 
-# Distro & preset
 distro="immortalwrt"
 repo="https://github.com/immortalwrt/immortalwrt.git"
 preset_folder="AW1K-NIALWRT"
 preset_repo="https://github.com/nialwrt/AW1K-NIALWRT.git"
 
-# Build dependencies
 deps=(
     ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential
     bzip2 ccache clang cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext

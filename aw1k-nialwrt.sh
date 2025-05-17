@@ -206,7 +206,7 @@ rebuild_menu() {
 check_git
 main_menu
 
-echo -e "${BOLD_BLUE}INSTALLING DEPENDENCIES...${RESET}"
+echo -e "${BOLD_YELLOW}INSTALLING DEPENDENCIES...${RESET}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 

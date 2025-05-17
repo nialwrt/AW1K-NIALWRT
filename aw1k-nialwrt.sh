@@ -3,12 +3,12 @@
 script_path="$(realpath "$0")"
 
 # Color codes
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
-CYAN='\033[0;36m'
-MAGENTA='\033[0;35m'
+BLUE='\033[1;34m'
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[1;36m'
+MAGENTA='\033[1;35m'
 NC='\033[0m'
 BOLD='\033[1m'
 
@@ -38,7 +38,7 @@ prompt() {
 
 check_git() {
     command -v git &>/dev/null || {
-        echo -e "${RED}${BOLD}ERROR:${NC} Git is required."
+        echo -e "${RED}${BOLD}ERROR:${NC} GIT IS REQUIRED."
         exit 1
     }
 }
@@ -46,87 +46,87 @@ check_git() {
 main_menu() {
     clear
     echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
-    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT Firmware Build  ${NC}"
-    echo -e "${MAGENTA}  https://github.com/nialwrt          ${NC}"
-    echo -e "${MAGENTA}  Telegram: @NIALVPN                  ${NC}"
+    echo -e "${MAGENTA}${BOLD}  AW1K-NIALWRT FIRMWARE BUILD         ${NC}"
+    echo -e "${MAGENTA}${BOLD}  HTTPS://GITHUB.COM/NIALWRT          ${NC}"
+    echo -e "${MAGENTA}${BOLD}  TELEGRAM: @NIALVPN                  ${NC}"
     echo -e "${MAGENTA}${BOLD}--------------------------------------${NC}"
 }
 
 update_feeds() {
-    echo -e "${CYAN}Updating feeds...${NC}"
+    echo -e "${CYAN}${BOLD}UPDATING FEEDS...${NC}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -ne "Edit feeds if needed, then press Enter: "
+    echo -ne "${BLUE}${BOLD}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${NC}"
     read
     ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -e "${GREEN}Feeds updated.${NC}"
+    echo -e "${GREEN}${BOLD}FEEDS UPDATED.${NC}"
 }
 
 select_target() {
-    echo -e "${CYAN}Select branch or tag:${NC}"
+    echo -e "${CYAN}${BOLD}SELECT BRANCH OR TAG:${NC}"
     git fetch --all --tags
 
-    echo -e "Branches:"
+    echo -e "${BLUE}${BOLD}BRANCHES:${NC}"
     git branch -r | sed 's|origin/||' | grep -v 'HEAD' | sort -u
-    
-    echo -e "Tags:"
+
+    echo -e "${BLUE}${BOLD}TAGS:${NC}"
     git tag | sort -V
 
     while true; do
-        prompt "Enter branch or tag: " target_tag
+        prompt "${BLUE}${BOLD}ENTER BRANCH OR TAG: ${NC}" target_tag
         if git checkout "$target_tag" 2>/dev/null; then
-            echo -e "${GREEN}Checked out to $target_tag${NC}"
+            echo -e "${GREEN}${BOLD}CHECKED OUT TO $target_tag${NC}"
             break
         else
-            echo -e "${RED}Invalid branch/tag: $target_tag${NC}"
+            echo -e "${RED}${BOLD}INVALID BRANCH/TAG: $target_tag${NC}"
         fi
     done
 }
 
 ensure_preset() {
-    echo -e "${YELLOW}Cleaning old preset and config...${NC}"
+    echo -e "${YELLOW}${BOLD}CLEANING OLD PRESET AND CONFIG...${NC}"
     rm -rf ./files .config "$preset_folder"
-    echo -e "Cloning preset from $preset_repo..."
-    git clone "$preset_repo" "$preset_folder" || { echo -e "${RED}Failed to clone preset.${NC}"; exit 1; }
-    echo -e "${GREEN}Preset cloned.${NC}"
+    echo -e "${BLUE}${BOLD}CLONING PRESET FROM $preset_repo...${NC}"
+    git clone "$preset_repo" "$preset_folder" || { echo -e "${RED}${BOLD}FAILED TO CLONE PRESET.${NC}"; exit 1; }
+    echo -e "${GREEN}${BOLD}PRESET CLONED.${NC}"
 }
 
 apply_preset() {
-    echo -e "Applying preset files and config..."
+    echo -e "${BLUE}${BOLD}APPLYING PRESET FILES AND CONFIG...${NC}"
     cp -r "$preset_folder/files" ./
     cp "$preset_folder/config-upload" .config
 }
 
 run_menuconfig() {
-    echo -e "Running menuconfig..."
+    echo -e "${BLUE}${BOLD}RUNNING MENUCONFIG...${NC}"
     if make menuconfig; then
-        echo -e "${GREEN}Configuration saved.${NC}"
+        echo -e "${GREEN}${BOLD}CONFIGURATION SAVED.${NC}"
     else
-        echo -e "${RED}menuconfig failed.${NC}"
+        echo -e "${RED}${BOLD}MENUCONFIG FAILED.${NC}"
     fi
 }
 
 start_build() {
-    echo -e "Building firmware with $(nproc) cores..."
+    echo -e "${BLUE}${BOLD}BUILDING FIRMWARE WITH $(nproc) CORES...${NC}"
     local start_time=$(date +%s)
     if make -j"$(nproc)"; then
         local duration=$(( $(date +%s) - start_time ))
-        printf "${GREEN}Build completed in %02dh %02dm %02ds${NC}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
-        echo -e "Output: $(pwd)/bin/targets/"
+        printf "${GREEN}${BOLD}BUILD COMPLETED IN %02dh %02dm %02ds${NC}\n" $((duration/3600)) $(((duration%3600)/60)) $((duration%60))
+        echo -e "${BLUE}${BOLD}OUTPUT: $(pwd)/bin/targets/${NC}"
     else
-        echo -e "${RED}Build failed.${NC}"
+        echo -e "${RED}${BOLD}BUILD FAILED.${NC}"
     fi
 }
 
 cleanup() {
-    echo -e "${YELLOW}Cleaning up...${NC}"
+    echo -e "${YELLOW}${BOLD}CLEANING UP...${NC}"
     rm -f "$script_path"
     rm -rf "$preset_folder"
 }
 
 build_menu() {
-    echo -e "${CYAN}Cloning repo: $repo..."
+    echo -e "${CYAN}${BOLD}CLONING REPO: $repo...${NC}"
     git clone "$repo" "$distro" || {
-        echo -e "${RED}Git clone failed.${NC}"
+        echo -e "${RED}${BOLD}GIT CLONE FAILED.${NC}"
         exit 1
     }
 
@@ -143,13 +143,13 @@ build_menu() {
 
 rebuild_menu() {
     cd "$distro" || exit 1
-    echo -e "${BLUE}Rebuild Options:${NC}"
-    echo "1) Firmware & Package update"
-    echo "2) Firmware Update"
-    echo "3) Existing update"
+    echo -e "${BLUE}${BOLD}REBUILD OPTIONS:${NC}"
+    echo "${BLUE}${BOLD}1) FIRMWARE & PACKAGE UPDATE${NC}"
+    echo "${BLUE}${BOLD}2) FIRMWARE UPDATE${NC}"
+    echo "${BLUE}${BOLD}3) EXISTING UPDATE${NC}"
 
     while true; do
-        prompt "${YELLOW}Choose option [1/2/3]: ${NC}" opt
+        prompt "${YELLOW}${BOLD}CHOOSE OPTION [1/2/3]: ${NC}" opt
         case "$opt" in
             1)
                 make distclean
@@ -179,7 +179,7 @@ rebuild_menu() {
                 break
                 ;;
             *)
-                echo -e "${RED}Invalid choice.${NC}" ;;
+                echo -e "${RED}${BOLD}INVALID CHOICE.${NC}" ;;
         esac
     done
 }
@@ -187,12 +187,12 @@ rebuild_menu() {
 check_git
 main_menu
 
-echo -e "${CYAN}Installing dependencies...${NC}"
+echo -e "${CYAN}${BOLD}INSTALLING DEPENDENCIES...${NC}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 
 if [ -d "$distro/.git" ]; then
-    echo -e "${BLUE}Found existing '$distro' directory.${NC}"
+    echo -e "${BLUE}${BOLD}FOUND EXISTING '$distro' DIRECTORY.${NC}"
     rebuild_menu
 else
     build_menu

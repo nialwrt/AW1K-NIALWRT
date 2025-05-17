@@ -108,7 +108,6 @@ start_build() {
 
 cleanup() {
   echo -e "${BOLD_YELLOW}CLEANING UP...${RESET}"
-  rm -f "$script_path"
   rm -rf "$preset_folder"
 }
 
@@ -147,43 +146,44 @@ rebuild_menu() {
   echo -e "${BOLD_CYAN}3)${RESET} EXISTING CONFIG BUILD (NO CHANGES)"
   echo ""
 
-while true; do
-  prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
-  case "$opt" in
-    1)
-      echo -e "${BOLD_YELLOW}FULL REBUILD SELECTED.${RESET}"
-      make distclean
-      update_feeds || exit 1
-      select_target
-      ensure_preset
-      apply_preset
-      make defconfig
-      run_menuconfig
-      start_build
-      cleanup
-      break
-      ;;
-    2)
-      echo -e "${BOLD_YELLOW}FAST REBUILD SELECTED.${RESET}"
-      select_target
-      ensure_preset
-      apply_preset
-      make defconfig
-      run_menuconfig
-      start_build
-      cleanup
-      break
-      ;;
-    3)
-      echo -e "${BOLD_YELLOW}EXISTING CONFIG BUILD SELECTED.${RESET}"
-      start_build
-      cleanup
-      break
-      ;;
-    *)
-      echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1, 2, OR 3.${RESET}" ;;
-  esac
-done
+  while true; do
+    prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
+    case "$opt" in
+      1)
+        echo -e "${BOLD_YELLOW}FULL REBUILD SELECTED.${RESET}"
+        make distclean
+        update_feeds || exit 1
+        select_target
+        ensure_preset
+        apply_preset
+        make defconfig
+        run_menuconfig
+        start_build
+        cleanup
+        break
+        ;;
+      2)
+        echo -e "${BOLD_YELLOW}FAST REBUILD SELECTED.${RESET}"
+        select_target
+        ensure_preset
+        apply_preset
+        make defconfig
+        run_menuconfig
+        start_build
+        cleanup
+        break
+        ;;
+      3)
+        echo -e "${BOLD_YELLOW}EXISTING CONFIG BUILD SELECTED.${RESET}"
+        start_build
+        cleanup
+        break
+        ;;
+      *)
+        echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1, 2, OR 3.${RESET}" ;;
+    esac
+  done
+}
 
 check_git
 main_menu
@@ -192,7 +192,9 @@ echo -e "${BOLD_BLUE}INSTALLING DEPENDENCIES...${RESET}"
 sudo apt update -y && sudo apt full-upgrade -y
 sudo apt install -y "${deps[@]}"
 
-[ -d "$distro/.git" ] && {
+if [ -d "$distro/.git" ]; then
   echo -e "${BOLD_BLUE}FOUND EXISTING '$distro' DIRECTORY.${RESET}"
   rebuild_menu
-} || build_menu
+else
+  build_menu
+fi

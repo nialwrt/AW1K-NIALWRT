@@ -95,7 +95,7 @@ select_target() {
 }
 
 ensure_preset() {
-    echo -e "${BOLD_YELLOW}CLEANING OLD PRESET AND CONFIG...${RESET}"
+    echo -e "${BOLD_BLUE}CLEANING OLD PRESET AND CONFIG...${RESET}"
     rm -rf ./files .config "$preset_folder"
     echo -e "${BOLD_BLUE}CLONING PRESET FROM $preset_repo...${RESET}"
     git clone "$preset_repo" "$preset_folder" && echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}" || {
@@ -105,7 +105,7 @@ ensure_preset() {
 }
 
 apply_preset() {
-    echo -e "${BOLD_BLUE}APPLYING PRESET FILES AND CONFIG...${RESET}"
+    echo -e "${BOLD_YELLOW}APPLYING PRESET FILES AND CONFIG...${RESET}"
     cp -r "$preset_folder/files" ./ 2>/dev/null
     cp "$preset_folder/config-upload" .config 2>/dev/null || echo -e "${BOLD_YELLOW}WARNING: config-upload not found.${RESET}"
 }
@@ -159,19 +159,14 @@ rebuild_menu() {
     echo -e "${BOLD_MAGENTA}          https://github.com/nialwrt            ${RESET}"
     echo -e "${BOLD_MAGENTA}          Telegram: @NIALVPN                    ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
-    echo ""
-
-    echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
-    echo -e "${BOLD_CYAN}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
-    echo -e "${BOLD_CYAN}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
-    echo -e "${BOLD_CYAN}3)${RESET} EXISTING UPDATE (NO CHANGES)"
-    echo ""
-
+    echo -e "${BOLD_BLUE}REBUILD MENU:${RESET}"
+    echo -e "${BOLD_BLUE}1)${RESET} FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
+    echo -e "${BOLD_BLUE}2)${RESET} FIRMWARE UPDATE (FAST REBUILD)"
+    echo -e "${BOLD_BLUE}3)${RESET} EXISTING UPDATE (NO CHANGES)"
     while true; do
-        prompt "${BOLD_BLUE}CHOOSE OPTION [1/2/3]: ${RESET}" opt
+        prompt "${BOLD_YELLOW}CHOOSE OPTION [1/2/3]: ${RESET}" opt
         case "$opt" in
         1)
-            echo -e "${BOLD_YELLOW}FIRMWARE & PACKAGE SELECTED.${RESET}"
             make distclean
             update_feeds || exit 1
             select_target
@@ -184,7 +179,6 @@ rebuild_menu() {
             break
             ;;
         2)
-            echo -e "${BOLD_YELLOW}FIRMWARE UPDATE SELECTED.${RESET}"
             select_target
             ensure_preset
             apply_preset
@@ -195,7 +189,6 @@ rebuild_menu() {
             break
             ;;
         3)
-            echo -e "${BOLD_YELLOW}EXISTING UPDATE SELECTED.${RESET}"
             start_build
             cleanup
             break

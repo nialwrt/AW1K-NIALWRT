@@ -26,10 +26,7 @@ deps=( ack antlr3 asciidoc autoconf automake autopoint binutils bison build-esse
 # Placeholder variables
 choice="" target_tag="" opt=""
 
-prompt() {
-  echo -ne "$1"
-  read -r "$2"
-}
+prompt() { read -rp "$1" "$2"; }
 
 check_git() {
   command -v git &>/dev/null || {
@@ -141,12 +138,14 @@ rebuild_menu() {
   echo -e "${BOLD_MAGENTA}        AW1K-NIALWRT FIRMWARE BUILD         ${RESET}"
   echo -e "${BOLD_MAGENTA}        https://github.com/nialwrt          ${RESET}"
   echo -e "${BOLD_MAGENTA}        Telegram: @NIALVPN                  ${RESET}"
-  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}\n"
+  echo -e "${BOLD_MAGENTA}--------------------------------------------${RESET}"
+  echo ""
 
   echo -e "${BOLD_YELLOW}REBUILD OPTIONS:${RESET}"
   echo -e "${BOLD_CYAN}1)${RESET} Firmware & Package Update (full rebuild)"
   echo -e "${BOLD_CYAN}2)${RESET} Firmware Update (fast rebuild)"
-  echo -e "${BOLD_CYAN}3)${RESET} Existing Config Build (no changes)\n"
+  echo -e "${BOLD_CYAN}3)${RESET} Existing Config Build (no changes)"
+  echo ""
 
   while true; do
     prompt "${BOLD_BLUE}Choose option [1/2/3]: ${RESET}" opt

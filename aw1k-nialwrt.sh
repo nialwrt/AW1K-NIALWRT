@@ -41,26 +41,6 @@ main_menu() {
     echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_BLUE}BUILD MENU:${RESET}"
-    echo -e "1) BUILD FIRMWARE"
-    echo -e "2) EXIT"
-    
-    while true; do
-        echo -ne "${BOLD_BLUE}CHOOSE OPTION: ${RESET}"
-        read -r opt
-        case "$opt" in
-            1)
-                build_menu
-                break
-                ;;
-            2)
-                echo -e "${BOLD_GREEN}EXITING...${RESET}"
-                exit 0
-                ;;
-            *)
-                echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1 OR 2.${RESET}"
-                ;;
-        esac
-    done
 }
 
 rebuild_menu() {

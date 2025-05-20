@@ -210,19 +210,7 @@ build_menu() {
     start_build
 }
 
-build_menu() {
-    echo -e "${BOLD_YELLOW}CLONING REPOSITORY: $repo ...${RESET}"
-    git clone "$repo" "$distro" || {
-        echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
-        exit 1
-    }
-    cd "$distro" || exit 1
-    update_feeds || exit 1
-    select_target
-    run_menuconfig
-    start_build
-}
-
+# Main execution starts here
 main_menu
 if [ -d "$distro" ]; then
     rebuild_menu

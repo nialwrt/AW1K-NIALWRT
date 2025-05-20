@@ -41,6 +41,26 @@ main_menu() {
     echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
     echo -e "${BOLD_BLUE}BUILD MENU:${RESET}"
+    echo -e "1) BUILD FIRMWARE"
+    echo -e "2) EXIT"
+    
+    while true; do
+        echo -ne "${BOLD_BLUE}CHOOSE OPTION: ${RESET}"
+        read -r opt
+        case "$opt" in
+            1)
+                build_menu
+                break
+                ;;
+            2)
+                echo -e "${BOLD_GREEN}EXITING...${RESET}"
+                exit 0
+                ;;
+            *)
+                echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1 OR 2.${RESET}"
+                ;;
+        esac
+    done
 }
 
 rebuild_menu() {
@@ -62,11 +82,7 @@ rebuild_menu() {
             1)
                 echo -e "${BOLD_YELLOW}REMOVING EXISTING BUILD DIRECTORY: ${distro}${RESET}"
                 rm -rf "$distro"
-                echo -e "${BOLD_YELLOW}CLONING FRESH FROM REPOSITORY: $repo${RESET}"
-                git clone "$repo" "$distro" || {
-                    echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
-                    exit 1
-                }
+                git_distro
                 cd "$distro" || exit 1
                 update_feeds || exit 1
                 select_target
@@ -94,19 +110,31 @@ rebuild_menu() {
                 ;;
             *)
                 echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1, 2, OR 3.${RESET}"
+                exit 1
                 ;;
         esac
     done
 }
 
-check_dependencies() {
-    echo -e "${BOLD_BLUE}Checking dependencies...${RESET}"
-    for pkg in "${deps[@]}"; do
-        if ! dpkg -s "$pkg" &>/dev/null; then
-            echo -e "${BOLD_RED}Missing: $pkg${RESET}"
-        fi
-    done
+install_deps() {
+    echo -e "${BOLD_YELLOW}INSTALLING ALL REQUIRED DEPENDENCIES...${RESET}"
+    sudo apt update -qq && sudo apt install -y "${deps[@]}" || {
+        echo -e "${BOLD_RED}FAILED TO INSTALL DEPENDENCIES. EXITING.${RESET}"
+    }
 }
+
+git_distro() {
+    if [ ! -d "$distro" ]; then
+        echo -e "${BOLD_YELLOW}CLONING REPOSITORY: $repo INTO $distro...${RESET}"
+        git clone "$repo" "$distro" || {
+            echo -e "${BOLD_RED}GIT CLONE FAILED. EXITING.${RESET}"
+            exit 1
+        }
+    else
+        echo -e "${BOLD_GREEN}DIRECTORY '$distro' ALREADY EXISTS. SKIPPING CLONE.${RESET}"
+    fi
+}
+
 
 update_feeds() {
     echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
@@ -203,16 +231,12 @@ start_build() {
             select_target
             run_menuconfig
         fi
-    done
+    done || exit 1
 }
 
 build_menu() {
-    echo -e "${BOLD_YELLOW}CLONING REPOSITORY: $repo ...${RESET}"
-    git clone "$repo" "$distro" || {
-        echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
-        exit 1
-    }
-    check_dependencies
+    install_deps
+    git_distro
     cd "$distro" || exit 1
     update_feeds || exit 1
     select_target

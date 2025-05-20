@@ -99,6 +99,15 @@ rebuild_menu() {
     done
 }
 
+check_dependencies() {
+    echo -e "${BOLD_BLUE}Checking dependencies...${RESET}"
+    for pkg in "${deps[@]}"; do
+        if ! dpkg -s "$pkg" &>/dev/null; then
+            echo -e "${BOLD_RED}Missing: $pkg${RESET}"
+        fi
+    done
+}
+
 update_feeds() {
     echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
     ./scripts/feeds update -a && ./scripts/feeds install -a || {
@@ -203,6 +212,7 @@ build_menu() {
         echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
         exit 1
     }
+    check_dependencies
     cd "$distro" || exit 1
     update_feeds || exit 1
     select_target

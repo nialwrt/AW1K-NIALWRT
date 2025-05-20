@@ -206,11 +206,12 @@ build_menu() {
     cd "$distro" || exit 1
     update_feeds || exit 1
     select_target
+    apply_preset
+    make defconfig
     run_menuconfig
     start_build
 }
 
-# Main execution starts here
 main_menu
 if [ -d "$distro" ]; then
     rebuild_menu

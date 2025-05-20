@@ -174,14 +174,14 @@ start_build() {
     get_version
     while true; do
         echo -e "${BOLD_YELLOW}STARTING BUILD WITH $(nproc) CORES...${RESET}"
-        local start=$(date +%s)
+        start=$(date +%s)
 
         if make -j"$(nproc)"; then
+            dur=$(( $(date +%s) - start ))
             echo -e "${BOLD_YELLOW}BUILD VERSION: ${version_branch}${version_tag}${RESET}"
             echo -e "${BOLD_BLUE}OUTPUT DIRECTORY: $(pwd)/bin/targets/${RESET}"
-            start=$(date +%s)
             printf "${BOLD_GREEN}BUILD COMPLETED IN %02dh %02dm %02ds${RESET}\n" \
-            dur=$(( $(date +%s) - start ))
+                $((dur / 3600)) $(((dur % 3600) / 60)) $((dur % 60))
             rm -f -- "$script_path"
             break
         else
@@ -195,6 +195,19 @@ start_build() {
             run_menuconfig
         fi
     done
+}
+
+build_menu() {
+    echo -e "${BOLD_YELLOW}CLONING REPOSITORY: $repo ...${RESET}"
+    git clone "$repo" "$distro" || {
+        echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
+        exit 1
+    }
+    cd "$distro" || exit 1
+    update_feeds || exit 1
+    select_target
+    run_menuconfig
+    start_build
 }
 
 build_menu() {

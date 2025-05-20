@@ -249,8 +249,10 @@ build_menu() {
 }
 
 main_menu
-if [ -d "$distro" ]; then
+if [ "$1" = "rebuild" ]; then
+    main_menu
     rebuild_menu
 else
+    main_menu
     build_menu
-fi
+fit

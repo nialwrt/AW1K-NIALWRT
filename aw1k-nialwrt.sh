@@ -230,6 +230,7 @@ start_build() {
             make distclean
             update_feeds || return 1
             select_target
+            apply_preset
             run_menuconfig
         fi
     done || exit 1

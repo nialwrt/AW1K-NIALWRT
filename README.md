@@ -38,4 +38,5 @@ AW1K-NIALWRT is a beginner-friendly OpenWrt build script designed for quick depl
 cd /tmp && wget -O fw.bin https://github.com/nialwrt/AW1K-NIALWRT/releases/download/AW1K-NIALWRT/AW1K-NIALWRT.bin && sysupgrade -n fw.bin
 
 ## Quick Installation
+```
 wget https://raw.githubusercontent.com/nialwrt/AW1K-NIALWRT/main/aw1k-nialwrt.sh && chmod +x aw1k-nialwrt.sh && ./aw1k-nialwrt.sh

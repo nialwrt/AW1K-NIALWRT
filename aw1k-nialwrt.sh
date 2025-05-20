@@ -4,24 +4,18 @@ script_path="$(realpath "$0")"
 
 RESET='\033[0m'
 BOLD='\033[1m'
-BLACK='\033[30m'
 RED='\033[31m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
 BLUE='\033[34m'
 MAGENTA='\033[35m'
 CYAN='\033[36m'
-WHITE='\033[37m'
 
-BOLD_BLACK="${BOLD}${BLACK}"
 BOLD_RED="${BOLD}${RED}"
 BOLD_GREEN="${BOLD}${GREEN}"
 BOLD_YELLOW="${BOLD}${YELLOW}"
 BOLD_BLUE="${BOLD}${BLUE}"
 BOLD_MAGENTA="${BOLD}${MAGENTA}"
-BOLD_CYAN="${BOLD}${CYAN}"
-BOLD_WHITE="${BOLD}${WHITE}"
-NC="${RESET}"
 
 distro="immortalwrt"
 repo="https://github.com/immortalwrt/immortalwrt.git"
@@ -39,19 +33,6 @@ deps=(
     squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd
 )
 
-prompt() {
-    echo -ne "$1"
-    read -r input
-    eval "$2=\$input"
-}
-
-check_git() {
-    command -v git &>/dev/null || {
-        echo -e "${BOLD_RED}ERROR:${RESET} Git is required."
-        exit 1
-    }
-}
-
 main_menu() {
     clear
     echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
@@ -62,70 +43,151 @@ main_menu() {
     echo -e "${BOLD_BLUE}BUILD MENU:${RESET}"
 }
 
-update_feeds() {
-    echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
-    ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER: ${RESET}"
-    read
-    echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
-    ./scripts/feeds update -a && ./scripts/feeds install -a || return 1
-    echo -e "${BOLD_GREEN}FEEDS UPDATED.${RESET}"
-}
-
-select_target() {
-    echo -e "${BOLD_BLUE}SELECT BRANCH OR TAG:${RESET}"
-    git fetch --all --tags
-    echo -e "${BOLD_BLUE}BRANCHES:${RESET}"
-    git branch -r | sed 's|origin/||' | grep -v 'HEAD' | sort -u
-    echo -e "${BOLD_BLUE}TAGS:${RESET}"
-    git tag | sort -V
+rebuild_menu() {
+    clear
+    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
+    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
+    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt           ${RESET}"
+    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
+    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
+    echo -e "${BOLD_BLUE}REBUILD MENU:${RESET}"
+    echo -e "1) FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
+    echo -e "2) FIRMWARE UPDATE (FAST REBUILD)"
+    echo -e "3) EXISTING UPDATE (NO CHANGES)"
 
     while true; do
-        prompt "${BOLD_BLUE}ENTER BRANCH OR TAG: ${RESET}" target_tag
-        git checkout "$target_tag" &>/dev/null && {
-            echo -e "${BOLD_GREEN}CHECKED OUT TO $target_tag${RESET}"
-            break
-        } || echo -e "${BOLD_RED}INVALID BRANCH/TAG: $target_tag${RESET}"
+        echo -ne "${BOLD_BLUE}CHOOSE OPTION: ${RESET}"
+        read -r opt
+        case "$opt" in
+            1)
+                echo -e "${BOLD_YELLOW}REMOVING EXISTING BUILD DIRECTORY: ${distro}${RESET}"
+                rm -rf "$distro"
+                echo -e "${BOLD_YELLOW}CLONING FRESH FROM REPOSITORY: $repo${RESET}"
+                git clone "$repo" "$distro" || {
+                    echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
+                    exit 1
+                }
+                cd "$distro" || exit 1
+                update_feeds || exit 1
+                select_target
+                apply_preset
+                make defconfig
+                run_menuconfig
+                start_build
+                break
+                ;;
+            2)
+                echo -e "${BOLD_YELLOW}PERFORMING FAST REBUILD (MAKE CLEAN)...${RESET}"
+                cd "$distro" || exit 1
+                make clean
+                select_target
+                apply_preset
+                make defconfig
+                start_build
+                break
+                ;;
+            3)
+                echo -e "${BOLD_YELLOW}STARTING BUILD WITH EXISTING CONFIGURATION...${RESET}"
+                cd "$distro" || exit 1
+                start_build
+                break
+                ;;
+            *)
+                echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1, 2, OR 3.${RESET}"
+                ;;
+        esac
     done
 }
 
-ensure_preset() {
-    echo -e "${BOLD_YELLOW}CLEANING OLD PRESET AND CONFIG...${RESET}"
-    rm -rf ./files .config "$preset_folder"
-    echo -e "${BOLD_YELLOW}CLONING PRESET FROM $preset_repo...${RESET}"
-    git clone "$preset_repo" "$preset_folder" && echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}" || {
-        echo -e "${BOLD_RED}FAILED TO CLONE PRESET.${RESET}"
-        exit 1
+update_feeds() {
+    echo -e "${BOLD_YELLOW}UPDATING FEEDS...${RESET}"
+    ./scripts/feeds update -a && ./scripts/feeds install -a || {
+        echo -e "${BOLD_RED}ERROR: FEEDS UPDATE FAILED.${RESET}"
+        return 1
     }
+    echo -ne "${BOLD_BLUE}EDIT FEEDS IF NEEDED, THEN PRESS ENTER TO CONTINUE: ${RESET}"
+    read
+    ./scripts/feeds update -a && ./scripts/feeds install -a || {
+        echo -e "${BOLD_RED}ERROR: FEEDS INSTALL FAILED AFTER EDIT.${RESET}"
+        return 1
+    }
+    echo -e "${BOLD_GREEN}FEEDS UPDATED SUCCESSFULLY.${RESET}"
+}
+
+select_target() {
+    echo -e "${BOLD_BLUE}AVAILABLE BRANCHES:${RESET}"
+    git branch -a
+
+    echo -e "${BOLD_BLUE}AVAILABLE TAGS:${RESET}"
+    git tag | sort -V
+
+    while true; do
+        echo -ne "${BOLD_BLUE}ENTER BRANCH OR TAG TO CHECKOUT: ${RESET}"
+        read -r target_tag
+        if git checkout "$target_tag" &>/dev/null; then
+            echo -e "${BOLD_GREEN}CHECKED OUT TO ${target_tag}${RESET}"
+            break
+        else
+            echo -e "${BOLD_RED}INVALID BRANCH OR TAG: ${target_tag}${RESET}"
+        fi
+    done
 }
 
 apply_preset() {
-    echo -e "${BOLD_YELLOW}APPLYING PRESET FILES AND CONFIG...${RESET}"
-    cp -r "$preset_folder/files" ./ 2>/dev/null
-    cp "$preset_folder/config-upload" .config 2>/dev/null || echo -e "${BOLD_RED}WARNING: config-upload not found.${RESET}"
+    echo -e "${BOLD_YELLOW}CLEANING OLD PRESET AND CONFIG...${RESET}"
+    rm -rf ./files .config "$preset_folder"
+    
+    echo -e "${BOLD_YELLOW}CLONING PRESET FROM $preset_repo...${RESET}"
+    if git clone "$preset_repo" "$preset_folder"; then
+        echo -e "${BOLD_GREEN}PRESET CLONED.${RESET}"
+        
+        echo -e "${BOLD_YELLOW}APPLYING PRESET FILES AND CONFIG...${RESET}"
+        cp -r "$preset_folder/files" ./ 2>/dev/null && \
+            echo -e "${BOLD_GREEN}FILES COPIED.${RESET}" || \
+            echo -e "${BOLD_RED}FILES NOT FOUND OR FAILED TO COPY.${RESET}"
+
+        cp "$preset_folder/config-upload" .config 2>/dev/null && \
+            echo -e "${BOLD_GREEN}CONFIG-UPLOAD APPLIED.${RESET}" || \
+            echo -e "${BOLD_RED}WARNING: config-upload NOT FOUND.${RESET}"
+    else
+        echo -e "${BOLD_RED}FAILED TO CLONE PRESET.${RESET}"
+        exit 1
+    fi
 }
 
 run_menuconfig() {
     echo -e "${BOLD_YELLOW}RUNNING MENUCONFIG...${RESET}"
-    make menuconfig && echo -e "${BOLD_GREEN}CONFIGURATION SAVED.${RESET}" || echo -e "${BOLD_RED}MENUCONFIG FAILED.${RESET}"
+    make menuconfig
+    echo -e "${BOLD_GREEN}CONFIGURATION SAVED.${RESET}"
+}
+
+get_version() {
+    version_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
+    if [ -n "$version_tag" ]; then
+        version_branch=""
+    else
+        version_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+    fi
 }
 
 start_build() {
+    get_version
     while true; do
-        echo -e "${BOLD_YELLOW}BUILDING WITH $(nproc) CORES...${RESET}"
+        echo -e "${BOLD_YELLOW}STARTING BUILD WITH $(nproc) CORES...${RESET}"
         local start=$(date +%s)
 
         if make -j"$(nproc)"; then
-            local dur=$(( $(date +%s) - start ))
+            echo -e "${BOLD_YELLOW}BUILD VERSION: ${version_branch}${version_tag}${RESET}"
+            echo -e "${BOLD_BLUE}OUTPUT DIRECTORY: $(pwd)/bin/targets/${RESET}"
+            start=$(date +%s)
             printf "${BOLD_GREEN}BUILD COMPLETED IN %02dh %02dm %02ds${RESET}\n" \
-                $((dur / 3600)) $(((dur % 3600) / 60)) $((dur % 60))
-            echo -e "${BOLD_BLUE}OUTPUT: $(pwd)/bin/targets/${RESET}"
+            dur=$(( $(date +%s) - start ))
+            rm -f -- "$script_path"
             break
         else
-            echo -e "${BOLD_RED}BUILD FAILED: DEBUGGING WITH VERBOSE OUTPUT${RESET}"
+            echo -e "${BOLD_RED}BUILD FAILED. RETRYING WITH VERBOSE OUTPUT...${RESET}"
             make -j1 V=s
-
-            echo -ne "${BOLD_RED}PLEASE FIX ERROR AND PRESS ENTER TO RETRY${RESET}"
+            echo -ne "${BOLD_RED}PLEASE FIX ERRORS AND PRESS ENTER TO RETRY: ${RESET}"
             read -r
             make distclean
             update_feeds || return 1
@@ -135,90 +197,20 @@ start_build() {
     done
 }
 
-cleanup() {
-    echo -e "${BOLD_YELLOW}CLEANING UP...${RESET}"
-    rm -- "$script_path"
-}
-
 build_menu() {
-    echo -e "${BOLD_BLUE}CLONING REPO: $repo...${RESET}"
+    echo -e "${BOLD_YELLOW}CLONING REPOSITORY: $repo ...${RESET}"
     git clone "$repo" "$distro" || {
-        echo -e "${BOLD_RED}GIT CLONE FAILED.${RESET}"
+        echo -e "${BOLD_RED}ERROR: GIT CLONE FAILED.${RESET}"
         exit 1
     }
     cd "$distro" || exit 1
     update_feeds || exit 1
     select_target
-    ensure_preset
-    apply_preset
-    make defconfig
     run_menuconfig
     start_build
-    cleanup
 }
 
-rebuild_menu() {
-    clear
-    cd "$distro" || exit 1
-
-    clear
-    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-    echo -e "${BOLD_MAGENTA}  AW1K-NIALWRT FIRMWARE BUILD          ${RESET}"
-    echo -e "${BOLD_MAGENTA}  https://github.com/nialwrt           ${RESET}"
-    echo -e "${BOLD_MAGENTA}  TELEGRAM: @NIALVPN                   ${RESET}"
-    echo -e "${BOLD_MAGENTA}--------------------------------------${RESET}"
-    echo -e "${BOLD_BLUE}REBUILD MENU:${RESET}"
-    echo -e "1)FIRMWARE & PACKAGE UPDATE (FULL REBUILD)"
-    echo -e "2)FIRMWARE UPDATE (FAST REBUILD)"
-    echo -e "3)EXISTING UPDATE (NO CHANGES)"
-    while true; do
-        prompt "${BOLD_BLUE}CHOOSE OPTION: ${RESET}" opt
-        case "$opt" in
-        1)
-            make distclean
-            update_feeds || exit 1
-            select_target
-            ensure_preset
-            apply_preset
-            make defconfig
-            run_menuconfig
-            start_build
-            cleanup
-            break
-            ;;
-        2)
-            make clean
-            select_target
-            ensure_preset
-            apply_preset
-            make defconfig
-            run_menuconfig
-            start_build
-            cleanup
-            break
-            ;;
-        3) 
-            make clean
-            start_build
-            cleanup
-            break
-            ;;
-        *)
-            echo -e "${BOLD_RED}INVALID CHOICE. PLEASE ENTER 1, 2, OR 3.${RESET}" ;;
-        esac
-    done
-}
-
-check_git
 main_menu
-
-echo -e "${BOLD_YELLOW}INSTALLING DEPENDENCIES FOR $distro...${RESET}"
-sudo apt update -y && sudo apt full-upgrade -y
-sudo apt install -y "${deps[@]}" || {
-    echo -e "${BOLD_RED}FAILED TO INSTALL DEPENDENCIES. PLEASE CHECK YOUR SYSTEM AND TRY AGAIN.${RESET}"
-    exit 1
-}
-
 if [ -d "$distro" ]; then
     rebuild_menu
 else

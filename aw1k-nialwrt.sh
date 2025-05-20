@@ -255,4 +255,4 @@ if [ "$1" = "rebuild" ]; then
 else
     main_menu
     build_menu
-fit
+fi
